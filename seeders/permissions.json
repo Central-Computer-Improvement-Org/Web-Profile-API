@@ -1,0 +1,30 @@
+[
+    {
+        "model": "users.permission",
+        "fields": {
+            "permission_name": "Create",
+            "permission_description": "Description for Permission 1"
+        }
+    },
+    {
+        "model": "users.permission",
+        "fields": {
+            "permission_name": "Update",
+            "permission_description": "Description for Permission 2"
+        }
+    },
+    {
+        "model": "users.permission",
+        "fields": {
+            "permission_name": "Delete",
+            "permission_description": "Description for Permission 3"
+        }
+    },
+    {
+        "model": "users.permission",
+        "fields": {
+            "permission_name": "View",
+            "permission_description": "Description for Permission 4"
+        }
+    }
+]

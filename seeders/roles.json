@@ -1,0 +1,18 @@
+[
+    {
+        "model": "users.role",
+        "fields": {
+            "role_name": "Role 1",
+            "role_description": "Description for Role 1",
+            "permission_id": [1, 2]
+        }
+    },
+    {
+        "model": "users.role",
+        "fields": {
+            "role_name": "Role 2",
+            "role_description": "Description for Role 2",
+            "permission_id": [2]
+        }
+    }
+]
