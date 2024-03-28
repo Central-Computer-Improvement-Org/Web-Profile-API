@@ -16,6 +16,6 @@ class UserManager(BaseUserManager):
         return user
 
     def create_superuser(self, email, password=None, **extra_fields) -> Result['User', Exception]:
-        role = Role.objects.get(id=1)
+        role = Role.objects.get(id="SPR")
         extra_fields.setdefault('role_id', role)
         return self.create_user(email, password, **extra_fields)
