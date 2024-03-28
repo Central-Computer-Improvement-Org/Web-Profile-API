@@ -1,8 +1,5 @@
 from rest_framework import serializers
 
-from users.models import User
-from users.v1.serializers import UserProfileSerializer
-
 
 class ResponseSerializer(serializers.Serializer):
     code = serializers.IntegerField()
