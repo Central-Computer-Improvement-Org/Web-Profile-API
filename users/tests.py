@@ -1,88 +1,52 @@
 from django.test import TestCase
 
 from users.models_roles import Role
-from users.models_permissions import Permission
 from users.models_divisions import Division
 from users.models_users import User
 
 
-def _add_permission(role: Role, permission: Permission):
-    role.permission_id.add(permission)
+def _create_user(nim, role, division, email, phone):
+    User.objects.create(nim=nim, role_id=role, division_id=division, email=email, phone_number=phone)
 
 
-def _create_user(nim, role, division, email):
-    User.objects.create(nim=nim, role_id=role, division_id=division, email=email)
+def _create_role(id, role_name):
+    Role.objects.create(id=id, name=role_name)
 
 
-def _create_permission(permission_name, permission_description):
-    Permission.objects.create(permission_name=permission_name, permission_description=permission_description)
-
-
-def _create_role(id, role_name, role_description):
-    Role.objects.create(id=id, role_name=role_name, role_description=role_description)
-
-
-def _create_division(division_name, division_description):
-    Division.objects.create(division_name=division_name, division_description=division_description)
+def _create_division(id, division_name, division_description):
+    Division.objects.create(id=id, name=division_name, description=division_description)
 
 
 class UserTestCase(TestCase):
 
     def setUp(self):
-        _create_permission('Create', 'Create permission')
-        _create_permission('Read', 'Read permission')
-        _create_permission('Update', 'Update permission')
-        _create_permission('Delete', 'Delete permission')
+        _create_role("SPR", 'Superadmin')
+        _create_role("PGR", 'Admin')
+        _create_role("USR", 'User')
 
-        create_perm = Permission.objects.get(permission_name='Create')
-        read_perm = Permission.objects.get(permission_name='Read')
-        update_perm = Permission.objects.get(permission_name='Update')
-        delete_perm = Permission.objects.get(permission_name='Delete')
+        superuser_role = Role.objects.get(id='SPR')
+        admin_role = Role.objects.get(id='PGR')
+        user_role = Role.objects.get(id='USR')
 
-        _create_role(1, 'Superuser', 'Superuser role')
-        _create_role(2, 'Admin', 'Admin role')
-        _create_role(3, 'User', 'User role')
+        _create_division("WBD", 'Web Developer', 'Web Developer division')
+        _create_division('MBL', 'Mobile Developer division', "Mobile")
+        _create_division('DSG', 'UI/UX Designer division', "UI")
 
-        superuser_role = Role.objects.get(role_name='Superuser')
-        admin_role = Role.objects.get(role_name='Admin')
-        user_role = Role.objects.get(role_name='User')
+        web_dev_division = Division.objects.get(id='WBD')
+        mobile_dev_division = Division.objects.get(id='MBL')
+        ui_ux_division = Division.objects.get(id='DSG')
 
-        _add_permission(superuser_role, create_perm)
-        _add_permission(superuser_role, read_perm)
-        _add_permission(superuser_role, update_perm)
-        _add_permission(superuser_role, delete_perm)
-
-        _add_permission(admin_role, read_perm)
-        _add_permission(admin_role, update_perm)
-
-        _add_permission(user_role, read_perm)
-
-        _create_division('Web Developer', 'Web Developer division')
-        _create_division('Mobile Developer', 'Mobile Developer division')
-        _create_division('UI/UX Designer', 'UI/UX Designer division')
-
-        web_dev_division = Division.objects.get(division_name='Web Developer')
-        mobile_dev_division = Division.objects.get(division_name='Mobile Developer')
-        ui_ux_division = Division.objects.get(division_name='UI/UX Designer')
-
-        _create_user('1234567890', superuser_role, web_dev_division, 'test1@mail.com')
-        _create_user('1234567891', admin_role, mobile_dev_division, 'test2@mail.com')
-        _create_user('1234567892', user_role, ui_ux_division, 'test3@mail.com')
+        _create_user('1234567890', superuser_role, web_dev_division, 'test1@mail.com', "0896")
+        _create_user('1234567891', admin_role, mobile_dev_division, 'test2@mail.com', "0893")
+        _create_user('1234567892', user_role, ui_ux_division, 'test3@mail.com', "08977")
 
     def test_user_role(self):
         test_user = User.objects.get(nim='1234567890')
-        self.assertEqual(test_user.role_id.role_name, 'Superuser')
+        self.assertEqual(test_user.role_id.name, 'Superadmin')
 
     def test_user_division(self):
         test_user = User.objects.get(nim='1234567890')
-        self.assertEqual(test_user.division_id.division_name, 'Web Developer')
-
-    def test_user_permission(self):
-        test_user = User.objects.get(nim='1234567890')
-        self.assertEqual(test_user.has_perm('Create'), True)
-        self.assertEqual(test_user.has_perm('Read'), True)
-        self.assertEqual(test_user.has_perm('Update'), True)
-        self.assertEqual(test_user.has_perm('Delete'), True)
+        self.assertEqual(test_user.division_id.id, 'WBD')
 
     def test_user_superuser(self):
         test_user = User.objects.get(nim='1234567890')
