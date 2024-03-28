@@ -3,16 +3,14 @@
         "model": "users.role",
         "fields": {
             "id": "SPR",
-            "role_name": "Superadmin",
-            "role_description": "Super Admin"
+            "name": "Superadmin"
         }
     },
     {
         "model": "users.role",
         "fields": {
             "id": "PGR",
-            "role_name": "Pengurus",
-            "role_description": "Pengurus"
+            "name": "Pengurus"
         }
     }
 ]
