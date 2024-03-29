@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
-from common.exceptions import validation_exception_handler
+from common.exceptions import validation_exception_handler, bad_request_exception_handler
 from users.models import User
 from users.v1.serializers import UserSerializer
 from generic_serializers.serializers import ResponseSerializer
@@ -29,14 +29,11 @@ class JwtObtain(TokenObtainPairView):
         except User.DoesNotExist:
             return not_found_exception_handler(request, "not found error", "No member with the following nim.")
 
-        if user.is_active:
+        if not user.is_active:
             return not_found_exception_handler(request, "not found error", "User is inactive.")
 
         if user.check_password(request.data.get('password')):
-            return validation_exception_handler(request, {
-                'name': 'AUTH_ERROR',
-                'message': 'Invalid credentials.',
-            })
+            return bad_request_exception_handler(request, "bad request error", "Invalid Password.")
 
         response = super().post(request, *args, **kwargs)
 
