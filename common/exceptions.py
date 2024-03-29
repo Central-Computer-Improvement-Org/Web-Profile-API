@@ -83,7 +83,7 @@ def validation_exception_handler(request, exception):
 
     val_errors = []
 
-    for key, value in exception.errors.items():
+    for key, value in exception.items():
         val_errors.append(ValidationErrorSerializer({
             'name': f"{key} field error",
             'message': str(value[0]),

@@ -32,8 +32,10 @@ class JwtObtain(TokenObtainPairView):
         if not user.is_active:
             return not_found_exception_handler(request, "not found error", "User is inactive.")
 
-        if user.check_password(request.data.get('password')):
-            return bad_request_exception_handler(request, "bad request error", "Invalid Password.")
+        if not user.check_password(request.data.get('password')):
+            return validation_exception_handler(request, {
+                'password': ["Invalid password."]
+            })
 
         response = super().post(request, *args, **kwargs)
 
@@ -48,7 +50,7 @@ class RegisterViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(data=request.data)
 
         if not serializer.is_valid():
-            return validation_exception_handler(request, serializer)
+            return validation_exception_handler(request, serializer.errors)
 
         self.perform_create(serializer)
 
