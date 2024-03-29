@@ -1,14 +1,14 @@
 from rest_framework import serializers
 
 
-class DataSerializer(serializers.Serializer):
-    def to_representation(self, instance):
-        return instance
-
-
 class ResponseSerializer(serializers.Serializer):
     code = serializers.IntegerField()
     status = serializers.CharField()
     recordsTotal = serializers.IntegerField()
-    data = DataSerializer(many=True)
+    data = serializers.SerializerMethodField()
     error = serializers.CharField(allow_null=True)
+
+    def get_data(self, instance):
+        data = instance.get('data')
+
+        return data

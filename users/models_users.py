@@ -36,10 +36,10 @@ class User(AbstractBaseUser):
         return self.role_id.name == "Superadmin"
 
     def is_pengurus(self):
-        return self.role_id.name == "Pengurus"
+        return self.role_id.name == "Pengurus" or self.role_id.name == "Superadmin"
 
     def is_member(self):
-        return self.role_id.name == "Member"
+        return self.role_id.name == "Member" or self.role_id.name == "Pengurus" or self.role_id.name == "Superadmin"
 
     def __str__(self):
         return self.email
