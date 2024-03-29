@@ -21,6 +21,8 @@ class User(AbstractBaseUser):
     year_university_enrolled = models.DateField(null=True)
     year_community_enrolled = models.DateField(null=True)
 
+    is_active = models.BooleanField(default=True)
+
     created_at = models.DateTimeField(auto_now_add=True, null=True)
     updated_at = models.DateTimeField(auto_now_add=True, null=True)
 
