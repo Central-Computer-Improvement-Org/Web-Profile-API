@@ -6,7 +6,7 @@ class Setting(models.Model):
     address = models.TextField(null=True)
     telp = models.CharField(max_length=255, null=True)
     description = models.TextField(null=True)
-    logo_uri = models.CharField(max_length=255, null=True)
+    logo_uri = models.ImageField(upload_to='uploads/setting/')
     title_website = models.CharField(max_length=255, null=True)
     keyword = models.TextField(null=True)
     created_at = models.DateTimeField(auto_now_add=True, null=True)
