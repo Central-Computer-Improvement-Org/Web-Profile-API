@@ -122,3 +122,21 @@ def bad_request_exception_handler(request, name, message):
         }
     })
     return Response(serializer.data)
+
+def unauthorized_exception_handler(request, name, message):
+    error_status = "UNAUTHORIZED_ERROR"
+
+    response_status = status.HTTP_401_UNAUTHORIZED
+
+    serializer = ResponseSerializer({
+        'code': response_status,
+        'status': error_status,
+        'recordsTotal': 0,
+        'data': None,
+        'error': {
+            'name': name,
+            'message': message,
+            'validation': None,
+        }
+    })
+    return Response(serializer.data)

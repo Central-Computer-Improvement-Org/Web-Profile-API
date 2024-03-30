@@ -4,7 +4,8 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
-from common.exceptions import validation_exception_handler, bad_request_exception_handler
+from auth.auth import IsPengurus
+from common.exceptions import validation_exception_handler, bad_request_exception_handler, unauthorized_exception_handler
 from users.models import User
 from users.v1.serializers import UserSerializer
 from generic_serializers.serializers import ResponseSerializer
@@ -47,6 +48,9 @@ class RegisterViewSet(viewsets.ModelViewSet):
     permission_classes = [AllowAny]
 
     def create(self, request, *args, **kwargs):
+        if request.user.is_anonymous or not request.user.is_pengurus():
+            return unauthorized_exception_handler(request, "unauthorized error", "You are not authorized to perform this action.")
+
         serializer = self.get_serializer(data=request.data)
 
         if not serializer.is_valid():
