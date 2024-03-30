@@ -18,6 +18,7 @@ from django.urls import path, include
 
 from users.urls import urlpatterns_v1 as userv1_urls
 from auth.urls import urlpatterns_v1 as authv1_urls
+from settings.urls import urlpatterns_v1 as settingv1_urls
 
 urlpatterns = [
     path('api/', include([
@@ -25,6 +26,7 @@ urlpatterns = [
             [
                 path('users/', include(userv1_urls)),
                 path('auth/', include(authv1_urls)),
+                path('settings/', include(settingv1_urls))
             ]
         ))
     ])),
