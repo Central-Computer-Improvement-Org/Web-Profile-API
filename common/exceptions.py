@@ -34,10 +34,11 @@ def jwt_exception_handler(exc, exception):
     return Response(serializer.data)
 
 
-def not_found_exception_handler(request, name, message):
+def not_found_exception_handler(request, name):
     error_status = "NOT_FOUND_ERROR"
 
     response_status = status.HTTP_404_NOT_FOUND
+
 
     serializer = ResponseSerializer({
         'code': response_status,
@@ -46,7 +47,7 @@ def not_found_exception_handler(request, name, message):
         'data': None,
         'error': {
             'name': name,
-            'message': message,
+            'message': name + " not found.",
             'validation': None,
         }
     })
