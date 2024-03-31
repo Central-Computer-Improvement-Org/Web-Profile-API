@@ -6,7 +6,6 @@ class ValidationErrorSerializer(serializers.Serializer):
     message = serializers.CharField(allow_null=True)
 
 
-
 class GenericErrorSerializer(serializers.Serializer):
     name = serializers.CharField(allow_null=True)
     message = serializers.CharField(allow_null=True)

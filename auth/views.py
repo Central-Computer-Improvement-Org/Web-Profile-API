@@ -1,16 +1,15 @@
 from rest_framework import viewsets
+from rest_framework.exceptions import ValidationError, NotFound
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 from auth.auth import IsPengurus
-from common.exceptions import validation_exception_handler, bad_request_exception_handler, unauthorized_exception_handler
+#from common.exceptions import validation_exception_handler
 from users.models import User
 from users.v1.serializers import UserSerializer
 from generic_serializers.serializers import ResponseSerializer
-
-from common.exceptions import not_found_exception_handler
 
 class JWTObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
@@ -28,14 +27,16 @@ class JwtObtain(TokenObtainPairView):
         try:
             user = User.objects.get(nim=request.data.get('nim'))
         except User.DoesNotExist:
-            return not_found_exception_handler(request, "not found error", "No member with the following nim.")
+            raise NotFound('User does not exist!')
 
         if not user.is_active:
-            return not_found_exception_handler(request, "not found error", "User is inactive.")
+            raise ValidationError({
+                'nim': ['User is not active']
+            })
 
         if not user.check_password(request.data.get('password')):
-            return validation_exception_handler(request, {
-                'password': ["Invalid password."]
+            raise ValidationError({
+                'password': ['Password is incorrect']
             })
 
         response = super().post(request, *args, **kwargs)
@@ -45,16 +46,13 @@ class JwtObtain(TokenObtainPairView):
 
 class RegisterViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [IsPengurus]
 
     def create(self, request, *args, **kwargs):
-        if request.user.is_anonymous or not request.user.is_pengurus():
-            return unauthorized_exception_handler(request, "unauthorized error", "You are not authorized to perform this action.")
-
         serializer = self.get_serializer(data=request.data)
 
         if not serializer.is_valid():
-            return validation_exception_handler(request, serializer.errors)
+            raise ValidationError(serializer.errors)
 
         self.perform_create(serializer)
 

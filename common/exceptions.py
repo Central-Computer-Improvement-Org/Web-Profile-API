@@ -1,142 +1,117 @@
-from django.core.exceptions import ValidationError
-from rest_framework.exceptions import AuthenticationFailed
+from rest_framework.exceptions import AuthenticationFailed, NotFound, PermissionDenied
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 from rest_framework_simplejwt.views import TokenViewBase
 from rest_framework.response import Response
 from rest_framework import status
 
+from rest_framework.exceptions import ValidationError
+
 from generic_serializers.serializers import ResponseSerializer, GenericErrorSerializer, ValidationErrorSerializer
 
 
-def jwt_exception_handler(exc, exception):
-    error_status = "AUTH_ERROR"
-    error_name = "Authentication Error"
-    error_message = 'Authentication credentials were not provided or data is invalid.'
-
-    response_status = status.HTTP_401_UNAUTHORIZED
-
-    if isinstance(exc, TokenError) or isinstance(exc, InvalidToken):
-        error_status = "TOKEN_ERROR"
-        error_name = "Token Error"
-        error_message = 'Token is invalid or expired.'
-
-    serializer = ResponseSerializer({
-        'code': response_status,
-        'status': error_status,
+def jwt_exception_handler(request, exc):
+    response = ResponseSerializer({
+        'code': 401,
+        'status': 'AUTHENTICATION_ERROR',
         'recordsTotal': 0,
         'data': None,
-        'error': {
-            'name': error_name,
-            'message': error_message,
+        'error': GenericErrorSerializer({
+            'name': exc.__name__,
+            'message': exc.default_detail,
             'validation': None,
-        }
+        }).data
     })
-    return Response(serializer.data)
+
+    return Response(response.data, status=status.HTTP_401_UNAUTHORIZED)
 
 
-def not_found_exception_handler(request, name, message):
-    error_status = "NOT_FOUND_ERROR"
-
-    response_status = status.HTTP_404_NOT_FOUND
-
-    serializer = ResponseSerializer({
-        'code': response_status,
-        'status': error_status,
-        'recordsTotal': 0,
-        'data': None,
-        'error': {
-            'name': name,
-            'message': message,
-            'validation': None,
-        }
-    })
-    return Response(serializer.data)
-
-
-def server_error_exception_handler(request, exception):
-    error_status = "SERVER_ERROR"
-    error_name = "Server Error"
-    error_message = 'Internal server error.'
-
-    response_status = status.HTTP_500_INTERNAL_SERVER_ERROR
-
-    serializer = ResponseSerializer({
-        'code': response_status,
-        'status': error_status,
-        'recordsTotal': 0,
-        'data': None,
-        'error': {
-            'name': error_name,
-            'message': error_message,
-            'validation': None,
-        }
-    })
-    return Response(serializer.data)
-
-
-def validation_exception_handler(request, exception):
-    error_status = "VALIDATION_ERROR"
-    error_name = "Validation Error"
-    error_message = 'Validation error.'
-
-    response_status = status.HTTP_400_BAD_REQUEST
-
+def validation_exception_handler(request, exc: ValidationError):
     val_errors = []
 
-    for key, value in exception.items():
+    for key, value in exc.detail.items():
         val_errors.append(ValidationErrorSerializer({
-            'name': f"{key} field error",
-            'message': str(value[0]),
+            'name': key,
+            'message': value[0]
         }).data)
 
-    serializer = ResponseSerializer({
-        'code': response_status,
-        'status': error_status,
+    response = ResponseSerializer({
+        'code': 400,
+        'status': 'VALIDATION_ERROR',
         'recordsTotal': 0,
-        'data': None,
-        'error': GenericErrorSerializer(
-            {
-                "name": error_name,
-                "message": error_message,
-                "validation": ValidationErrorSerializer(val_errors, many=True).data
-            }
-        ).data,
+        'error': GenericErrorSerializer({
+            'name': exc.__class__.__name__,
+            'message': exc.default_detail,
+            'validation': val_errors
+        }).data
     })
-    return Response(serializer.data)
+
+    return Response(response.data, status=status.HTTP_400_BAD_REQUEST)
 
 
-def bad_request_exception_handler(request, name, message):
-    error_status = "BAD_REQUEST_ERROR"
-
-    response_status = status.HTTP_400_BAD_REQUEST
-
-    serializer = ResponseSerializer({
-        'code': response_status,
-        'status': error_status,
+def server_error_exception_handler(request, exc):
+    response = ResponseSerializer({
+        'code': 500,
+        'status': 'SERVER_ERROR',
         'recordsTotal': 0,
-        'data': None,
-        'error': {
-            'name': name,
-            'message': message,
+        'error': GenericErrorSerializer({
+            'name': exc.__class__.__name__,
+            'message': exc.default_detail,
             'validation': None,
-        }
+        })
     })
-    return Response(serializer.data)
 
-def unauthorized_exception_handler(request, name, message):
-    error_status = "UNAUTHORIZED_ERROR"
+    return Response(response.data, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-    response_status = status.HTTP_401_UNAUTHORIZED
 
-    serializer = ResponseSerializer({
-        'code': response_status,
-        'status': error_status,
+def unauthorized_exception_handler(request, exc):
+    response = ResponseSerializer({
+        'code': 401,
+        'status': 'UNAUTHORIZED',
         'recordsTotal': 0,
-        'data': None,
-        'error': {
-            'name': name,
-            'message': message,
+        'error': GenericErrorSerializer({
+            'name': exc.__class__.__name__,
+            'message': exc.detail,
             'validation': None,
-        }
+        }).data
     })
-    return Response(serializer.data)
+
+    return Response(response.data, status=status.HTTP_401_UNAUTHORIZED)
+
+
+def not_found_exception_handler(request, exc):
+    response = ResponseSerializer({
+        'code': 404,
+        'status': 'NOT_FOUND',
+        'recordsTotal': 0,
+        'error': GenericErrorSerializer({
+            'name': exc.__class__.__name__,
+            'message': exc.detail,
+            'validation': None,
+        }).data
+    })
+
+    return Response(response.data, status=status.HTTP_404_NOT_FOUND)
+
+
+def global_exception_handler(exc, context):
+    request = context['request']
+    response = None
+
+    print(exc)
+
+    if isinstance(exc, ValidationError):
+        response = validation_exception_handler(request, exc)
+    elif isinstance(exc, AuthenticationFailed):
+        response = jwt_exception_handler(request, AuthenticationFailed)
+    elif isinstance(exc, InvalidToken):
+        response = jwt_exception_handler(exc, InvalidToken)
+    elif isinstance(exc, TokenError):
+        response = jwt_exception_handler(exc, TokenError)
+    elif isinstance(exc, NotFound):
+        response = not_found_exception_handler(request, exc)
+    elif isinstance(exc, PermissionDenied):
+        response = jwt_exception_handler(exc, PermissionDenied)
+    else:
+        response = server_error_exception_handler(request, exc)
+
+    return response
