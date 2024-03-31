@@ -130,6 +130,9 @@ AUTH_USER_MODEL = 'users.User'
 
 STATIC_URL = 'static/'
 
+import os
+STATIC_ROOT = os.path.join(BASE_DIR, STATIC_URL)
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
@@ -148,7 +151,9 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
-    'DEFAULT_EXCEPTION_HANDLER': 'common.exceptions.server_error_exception_handler',
+    'EXCEPTION_HANDLER': 'common.exceptions.global_exception_handler',
+    'DATETIME_FORMAT': '%d-%m-%Y %H:%M',
+    'DATE_FORMAT': '%d-%m-%Y',
 }
 
 # JWT settings

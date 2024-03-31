@@ -7,9 +7,8 @@ from rest_framework.serializers import ListSerializer
 from generic_serializers.serializers import ResponseSerializer, GenericErrorSerializer
 from auth.auth import IsSuperUser, IsPengurus
 
-from .serializers import UserProfileSerializer, UserSerializer
+from .serializers import UserSerializer
 from ..models import User
-from common.exceptions import jwt_exception_handler, not_found_exception_handler, server_error_exception_handler, validation_exception_handler
 
 
 class UserProfileViewSet(viewsets.ModelViewSet):
@@ -24,7 +23,7 @@ class UserProfileViewSet(viewsets.ModelViewSet):
                 'code': 200,
                 'status': 'success',
                 'recordsTotal': 1,
-                'data': UserProfileSerializer(profile).data,
+                'data': UserSerializer(profile).data,
                 'error': None,
             })
         else:
@@ -54,7 +53,7 @@ class UserViewSet(viewsets.ModelViewSet):
             'code': 200,
             'status': 'success',
             'recordsTotal': users.count(),
-            'data': UserProfileSerializer(users, many=True).data,
+            'data': UserSerializer(users, many=True).data,
             'error': None,
         })
 
