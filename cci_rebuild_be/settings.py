@@ -151,7 +151,9 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
-    'DEFAULT_EXCEPTION_HANDLER': 'common.exceptions.server_error_exception_handler',
+    'EXCEPTION_HANDLER': 'common.exceptions.global_exception_handler',
+    'DATETIME_FORMAT': '%d-%m-%Y %H:%M',
+    'DATE_FORMAT': '%d-%m-%Y',
 }
 
 # JWT settings
