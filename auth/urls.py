@@ -1,8 +1,8 @@
-from django.urls import path, include
+from django.urls import path
 
 from rest_framework_simplejwt.views import TokenRefreshView
 
-from .views import JwtObtain, RegisterViewSet
+from auth.v1.views import JwtObtain, RegisterViewSet
 
 
 urlpatterns_v1 = [
