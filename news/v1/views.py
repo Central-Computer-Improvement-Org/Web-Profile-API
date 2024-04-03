@@ -1,18 +1,26 @@
 from django.utils import timezone
+from django_filters import OrderingFilter
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
 from auth.auth import IsPengurus
+from common.orderings import KeywordOrderingFilter
 from generic_serializers.serializers import ResponseSerializer
 from news.news_models import News
 from news.v1.serializers import NewsSerializer
 
 
 class CMSNewsViewSet(viewsets.ModelViewSet):
+    queryset = News.objects.all()
     serializer_class = NewsSerializer
     permission_classes = [IsPengurus]
+    filterset_fields = ['title', 'created_at', 'updated_at']
+    filter_backends = [DjangoFilterBackend, KeywordOrderingFilter]
+    ordering_fields = ['created_at', 'updated_at']
+    ordering = ['created_at']
 
     def create(self, request, *args, **kwargs):
         super(CMSNewsViewSet, self).create(request, *args, **kwargs)
@@ -84,13 +92,13 @@ class CMSNewsViewSet(viewsets.ModelViewSet):
 
             return Response(serializer.data)
 
-        self.queryset = News.objects.all()
+        queryset = self.filter_queryset(self.get_queryset())
 
         serializer = ResponseSerializer({
             'code': 200,
             'status': 'success',
-            'recordsTotal': self.queryset.count(),
-            'data': NewsSerializer(self.queryset, many=True).data,
+            'recordsTotal': queryset.count(),
+            'data': NewsSerializer(queryset, many=True).data,
             'error': None,
         })
 

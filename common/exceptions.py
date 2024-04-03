@@ -1,4 +1,4 @@
-from rest_framework.exceptions import AuthenticationFailed, NotFound, PermissionDenied, NotAuthenticated
+from rest_framework.exceptions import AuthenticationFailed, NotFound, PermissionDenied, NotAuthenticated, ParseError
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 from rest_framework_simplejwt.views import TokenViewBase
 from rest_framework.response import Response
@@ -134,6 +134,8 @@ def global_exception_handler(exc, context):
         response = not_found_exception_handler(request, exc)
     elif isinstance(exc, NotAuthenticated):
         response = unauthorized_exception_handler(request, exc)
+    elif isinstance(exc, ParseError):
+        response = bad_request_exception_handler(request, exc)
     else:
         response = server_error_exception_handler(request, exc)
 

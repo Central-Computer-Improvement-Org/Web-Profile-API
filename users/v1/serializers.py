@@ -134,6 +134,7 @@ class DivisionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Division
         fields = '__all__'
+        read_only_fields = ['created_at', 'updated_at', 'created_by', 'updated_by']
 
     def create(self, validated_data):
         if self.context['request'].user.is_authenticated:
