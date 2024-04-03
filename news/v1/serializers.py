@@ -34,7 +34,8 @@ class NewsSerializer(serializers.ModelSerializer):
         ]
 
     def to_internal_value(self, data):
-        data['media_uri'] = data.get('mediaUri', None)
+        if 'mediaUri' in data:
+            data['media_uri'] = data.get('mediaUri', None)
 
         return super().to_internal_value(data)
 
