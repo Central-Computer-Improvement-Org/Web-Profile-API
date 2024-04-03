@@ -58,6 +58,7 @@ class ContactSerializer(serializers.ModelSerializer):
             'icon_uri',
             'value',
             'visited_count',
+            'is_active',
             'created_at',
             'updated_at',
         ]
@@ -71,6 +72,7 @@ class ContactSerializer(serializers.ModelSerializer):
         response['iconUri'] = response.pop('icon_uri')
         response['value'] = response.pop('value')
         response['visitedCount'] = response.pop('visited_count')
+        response['isActive'] = response.pop('is_active')
         response['createdAt'] = response.pop('created_at')
         response['updatedAt'] = response.pop('updated_at')
 
@@ -80,13 +82,7 @@ class ContactSerializer(serializers.ModelSerializer):
         data['platform'] = data.get('platform', None)
         data['icon_uri'] = data.get('iconUri', None)
         data['value'] = data.get('value', None)
+        data['is_active'] = data.get('isActive', None)
         data['visited_count'] = data.get('visitedCount', None)
 
         return super().to_internal_value(data)
-    
-    def update(self, instance, validated_data):
-        icon_uri = validated_data.get('icon_uri')
-        if icon_uri:
-            validated_data['icon_uri'] = rename_image_file(icon_uri, prefix="CNT")
-
-        return super().update(instance, validated_data)

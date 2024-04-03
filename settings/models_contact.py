@@ -8,9 +8,10 @@ class Contact(models.Model):
     icon_uri = models.ImageField(upload_to='uploads/contact/')
     value = models.CharField(max_length=255, null=True)
     visited_count = models.IntegerField(null=True)
+    is_active = models.BooleanField(default=False)
 
-    created_at = models.DateTimeField(auto_now_add=True, null=True)
-    updated_at = models.DateTimeField(auto_now=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def save(self, *args, **kwargs):
         if self.icon_uri:

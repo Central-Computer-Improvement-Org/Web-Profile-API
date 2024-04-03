@@ -11,7 +11,7 @@ urlpatterns_v1 = [
         path('contact/', ContactViewSet.as_view({
             'post': 'create',
             'put': 'update',
-            'delete': 'destroy',
+            'delete': 'delete',
         }), name='contact'),
     ])),
     path('setting/', SettingViewSet.as_view({

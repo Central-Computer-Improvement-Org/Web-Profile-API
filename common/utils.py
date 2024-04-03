@@ -11,3 +11,6 @@ def rename_image_file(image, prefix):
         new_image.name = f'{timestamp}{extension}'
         return new_image
     return image
+
+def id_generator(prefix):
+    return prefix + "-" + datetime.now().strftime('%Y%m%d%H%M%S')
