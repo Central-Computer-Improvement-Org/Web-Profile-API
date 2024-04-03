@@ -2,6 +2,7 @@ from django.contrib.auth.hashers import make_password
 from rest_framework import serializers
 
 from ..models import User, Role
+from ..models_divisions import Division
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -84,3 +85,19 @@ class RoleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Role
         fields = '__all__'
+
+
+class DivisionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Division
+        fields = '__all__'
+
+    def create(self, validated_data):
+        if self.context['request'].user.is_authenticated:
+            validated_data['created_by'] = self.context['request'].user.nim
+            validated_data['updated_by'] = self.context['request'].user.nim
+        else:
+            validated_data['created_by'] = "system"
+            validated_data['updated_by'] = "system"
+
+        return super(DivisionSerializer, self).create(validated_data)

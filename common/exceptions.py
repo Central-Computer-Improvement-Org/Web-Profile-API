@@ -8,6 +8,9 @@ from rest_framework.exceptions import ValidationError
 
 from generic_serializers.serializers import ResponseSerializer, GenericErrorSerializer, ValidationErrorSerializer
 
+from django.db.models import ObjectDoesNotExist
+
+from django.http import Http404
 
 def jwt_exception_handler(request, exc):
     response = ResponseSerializer({
@@ -85,7 +88,7 @@ def not_found_exception_handler(request, exc):
         'recordsTotal': 0,
         'error': GenericErrorSerializer({
             'name': exc.__class__.__name__,
-            'message': exc.detail,
+            'message': exc.__str__(),
             'validation': None,
         }).data
     })
@@ -107,6 +110,20 @@ def method_not_allowed_exception_handler(request, exc):
     return Response(response.data, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
+def bad_request_exception_handler(request, exc):
+    response = ResponseSerializer({
+        'code': 400,
+        'status': 'BAD_REQUEST',
+        'recordsTotal': 0,
+        'error': GenericErrorSerializer({
+            'name': exc.__class__.__name__,
+            'message': exc.__str__(),
+            'validation': None,
+        }).data
+    })
+
+    return Response(response.data, status=status.HTTP_400_BAD_REQUEST)
+
 def global_exception_handler(exc, context):
     request = context['request']
     response = None
@@ -125,6 +142,12 @@ def global_exception_handler(exc, context):
         response = not_found_exception_handler(request, exc)
     elif isinstance(exc, PermissionDenied):
         response = jwt_exception_handler(exc, PermissionDenied)
+    elif isinstance(exc, ValueError):
+        response = bad_request_exception_handler(request, exc)
+    elif isinstance(exc, ObjectDoesNotExist):
+        response = not_found_exception_handler(request, exc)
+    elif isinstance(exc, Http404):
+        response = not_found_exception_handler(request, exc)
     elif isinstance(exc, MethodNotAllowed):
         response = method_not_allowed_exception_handler(request, exc)
     else:

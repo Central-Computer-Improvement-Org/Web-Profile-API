@@ -16,18 +16,25 @@ Including another URLconf
 """
 from django.urls import path, include
 
-from users.urls import urlpatterns_v1 as userv1_urls
+from users.urls import urlpatterns_v1_cms as userv1_cms_urls
+from users.urls import urlpatterns_v1_public as userv1_urls
 from auth.urls import urlpatterns_v1 as authv1_urls
-from settings.urls import urlpatterns_v1 as settingv1_urls
+from settings.urls import urlpatterns_v1_cms as settingv1_cms_urls
+from settings.urls import urlpatterns_v1_public as settingv1_public_urls
+
+handler404 = "common.handler_views.error_404"
+
 
 urlpatterns = [
     path('api/', include([
-        path('v1/', include(
-            [
-                path('users/', include(userv1_urls)),
-                path('auth/', include(authv1_urls)),
-                path('settings/', include(settingv1_urls))
-            ]
-        ))
+        path('v1/', include([
+            path('cms/', include([
+                path('users/', include(userv1_cms_urls)),
+                path('settings/', include(settingv1_cms_urls))
+            ])),
+            path('users/', include(userv1_urls)),
+            path('auth/', include(authv1_urls)),
+            path('settings/', include(settingv1_public_urls)),
+        ])),
     ])),
 ]
