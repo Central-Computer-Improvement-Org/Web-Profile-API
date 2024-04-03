@@ -1,4 +1,4 @@
-from rest_framework.exceptions import AuthenticationFailed, NotFound, PermissionDenied
+from rest_framework.exceptions import AuthenticationFailed, NotFound, PermissionDenied, NotAuthenticated
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 from rest_framework_simplejwt.views import TokenViewBase
 from rest_framework.response import Response
@@ -58,9 +58,9 @@ def server_error_exception_handler(request, exc):
         'recordsTotal': 0,
         'error': GenericErrorSerializer({
             'name': exc.__class__.__name__,
-            'message': exc.default_detail,
+            'message': exc.__str__(),
             'validation': None,
-        })
+        }).data
     })
 
     return Response(response.data, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -114,7 +114,7 @@ def global_exception_handler(exc, context):
     request = context['request']
     response = None
 
-    print(exc)
+    print(exc.__class__)
 
     if isinstance(exc, ValidationError):
         response = validation_exception_handler(request, exc)
@@ -132,8 +132,8 @@ def global_exception_handler(exc, context):
         response = bad_request_exception_handler(request, exc)
     elif isinstance(exc, ObjectDoesNotExist):
         response = not_found_exception_handler(request, exc)
-    elif isinstance(exc, Http404):
-        response = not_found_exception_handler(request, exc)
+    elif isinstance(exc, NotAuthenticated):
+        response = unauthorized_exception_handler(request, exc)
     else:
         response = server_error_exception_handler(request, exc)
 

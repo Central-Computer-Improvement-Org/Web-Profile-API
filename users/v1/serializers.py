@@ -62,13 +62,17 @@ class UserSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         response = super().to_representation(instance)
 
-        response['roleId'] = response.pop('role_id')
-        response['divisionId'] = response.pop('division_id')
-        response['linkedinUri'] = response.pop('linkedin_uri')
-        response['phoneNumber'] = response.pop('phone_number')
-        response['profileUri'] = response.pop('profile_uri')
-        response['yearUniversityEnrolled'] = response.pop('year_university_enrolled')
-        response['yearCommunityEnrolled'] = response.pop('year_community_enrolled')
+        response['roleId'] = response.pop('role_id', None)
+        response['divisionId'] = response.pop('division_id', None)
+        response['linkedinUri'] = response.pop('linkedin_uri', None)
+        response['phoneNumber'] = response.pop('phone_number', None)
+        response['profileUri'] = response.pop('profile_uri', None)
+        response['yearUniversityEnrolled'] = response.pop('year_university_enrolled', None)
+        response['yearCommunityEnrolled'] = response.pop('year_community_enrolled', None)
+        response['createdAt'] = response.pop('created_at', None)
+        response['updatedAt'] = response.pop('updated_at', None)
+        response['createdBy'] = response.pop('created_by', None)
+        response['updatedBy'] = response.pop('updated_by', None)
 
         return response
 
