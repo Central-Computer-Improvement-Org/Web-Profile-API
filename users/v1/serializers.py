@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django.contrib.auth.hashers import make_password
 from rest_framework import serializers
 
@@ -36,6 +38,12 @@ class UserSerializer(serializers.ModelSerializer):
         data['year_university_enrolled'] = data.get('yearUniversityEnrolled', None)
         data['year_community_enrolled'] = data.get('yearCommunityEnrolled', None)
         data['linkedin_uri'] = data.get('linkedinUri', None)
+
+        if data['year_university_enrolled']:
+            data['year_university_enrolled'] = datetime.strptime(data['year_university_enrolled'], '%d-%m-%Y').date()
+
+        if data['year_community_enrolled']:
+            data['year_community_enrolled'] = datetime.strptime(data['year_community_enrolled'], '%d-%m-%Y').date()
 
         return super().to_internal_value(data)
 
