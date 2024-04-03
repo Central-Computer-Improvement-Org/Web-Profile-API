@@ -1,6 +1,8 @@
 from rest_framework import serializers
 
-from ..models import Setting
+from ..models import Setting, Contact
+
+from common.utils import rename_image_file
 
 class SettingSerializer(serializers.ModelSerializer): 
     class Meta: 
@@ -43,5 +45,44 @@ class SettingSerializer(serializers.ModelSerializer):
         data['logo_uri'] = data.get('logoUri', None)
         data['title_website'] = data.get('titleWebsite', None)
         data['keyword'] = data.get('keyword', None)
+
+        return super().to_internal_value(data)
+    
+
+class ContactSerializer(serializers.ModelSerializer):
+    class Meta: 
+        model = Contact 
+        fields = [
+            'id',
+            'platform',
+            'icon_uri',
+            'value',
+            'visited_count',
+            'is_active',
+            'created_at',
+            'updated_at',
+        ]
+
+    def to_representation(self, instance):
+        response = super().to_representation(instance)
+        # rename all field to camelCase
+
+        response['id'] = response.pop('id')
+        response['platform'] = response.pop('platform')
+        response['iconUri'] = response.pop('icon_uri')
+        response['value'] = response.pop('value')
+        response['visitedCount'] = response.pop('visited_count')
+        response['isActive'] = response.pop('is_active')
+        response['createdAt'] = response.pop('created_at')
+        response['updatedAt'] = response.pop('updated_at')
+
+        return response
+    
+    def to_internal_value(self, data):
+        data['platform'] = data.get('platform', None)
+        data['icon_uri'] = data.get('iconUri', None)
+        data['value'] = data.get('value', None)
+        data['is_active'] = data.get('isActive', None)
+        data['visited_count'] = data.get('visitedCount', None)
 
         return super().to_internal_value(data)
