@@ -18,7 +18,3 @@ class DetailNewsMedia(models.Model):
 
     def __str__(self):
         return str(self.news_id) + ' - ' + self.title
-
-    def save(self, *args, **kwargs):
-        self.id = f'DNM-{timezone.now().timestamp()}'
-        super(DetailNewsMedia, self).save(*args, **kwargs)

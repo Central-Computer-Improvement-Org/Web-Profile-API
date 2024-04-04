@@ -60,10 +60,37 @@ class NewsSerializer(serializers.ModelSerializer):
 class DetailNewsMediaSerializer(serializers.ModelSerializer):
     class Meta:
         model = DetailNewsMedia
-        fields = '__all__'
+        fields = [
+            'id',
+            'title',
+            'description',
+            'media_uri',
+            'news_id',
+            'created_at',
+            'updated_at',
+            'created_by',
+            'updated_by',
+        ]
+
+        read_only_fields = [
+            'id',
+            'created_at',
+            'updated_at',
+            'created_by',
+            'updated_by',
+        ]
+
+        required_fields = [
+            'title',
+            'description',
+            'media_uri',
+            'news_id',
+        ]
 
     def to_internal_value(self, data):
-        data['media_uri'] = data.get('mediaUri', None)
+        if 'mediaUri' in data:
+            data['media_uri'] = data.get('mediaUri', None)
+
         data['news_id'] = data.get('newsId', None)
 
         return super().to_internal_value(data)
@@ -79,6 +106,8 @@ class DetailNewsMediaSerializer(serializers.ModelSerializer):
         return response
 
     def create(self, validated_data):
+        validated_data['id'] = f'DNM-{timezone.now().strftime("%Y%m%d%H%M%S%f")}'
+
         validated_data['created_by'] = self.context['request'].user.nim
         validated_data['updated_by'] = self.context['request'].user.nim
 

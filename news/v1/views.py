@@ -9,8 +9,9 @@ from rest_framework.response import Response
 from auth.auth import IsPengurus
 from common.orderings import KeywordOrderingFilter
 from generic_serializers.serializers import ResponseSerializer
+from news.detail_news_media import DetailNewsMedia
 from news.news_models import News
-from news.v1.serializers import NewsSerializer
+from news.v1.serializers import NewsSerializer, DetailNewsMediaSerializer
 
 
 class CMSNewsViewSet(viewsets.ModelViewSet):
@@ -128,6 +129,98 @@ class PublicNewsViewSet(viewsets.ModelViewSet):
             'status': 'success',
             'recordsTotal': self.queryset.count(),
             'data': NewsSerializer(self.queryset, many=True).data,
+            'error': None,
+        })
+
+        return Response(serializer.data)
+
+
+class CMSDetailNewsMediaViewSet(viewsets.ModelViewSet):
+    queryset = DetailNewsMedia.objects.all()
+    serializer_class = DetailNewsMediaSerializer
+    permission_classes = [IsPengurus]
+    filterset_fields = ['title', 'created_at', 'updated_at']
+    filter_backends = [DjangoFilterBackend, KeywordOrderingFilter]
+    ordering_fields = ['created_at', 'updated_at']
+    ordering = ['created_at']
+
+    def create(self, request, *args, **kwargs):
+        super(CMSDetailNewsMediaViewSet, self).create(request, *args, **kwargs)
+
+        serializer = ResponseSerializer({
+            'code': 200,
+            'status': 'success',
+            'recordsTotal': 1,
+            'data': None,
+            'error': None,
+        })
+
+        return Response(serializer.data)
+
+    def destroy(self, request, *args, **kwargs):
+        if request.query_params.get('id') is None:
+            raise ValueError('ID is required')
+
+        detail_news_media = DetailNewsMedia.objects.get(id=request.query_params['id'])
+        detail_news_media.delete()
+
+        serializer = ResponseSerializer({
+            'code': 200,
+            'status': 'success',
+            'recordsTotal': 1,
+            'data': None,
+            'error': None,
+        })
+
+        return Response(serializer.data)
+
+    def update(self, request, *args, **kwargs):
+        if request.query_params.get('id') is None:
+            raise ValueError('ID is required')
+
+        serializer = self.get_serializer(data=request.data)
+
+        if not serializer.is_valid():
+            raise ValidationError(serializer.errors)
+
+        detail_news_media = DetailNewsMedia.objects.get(id=request.query_params['id'])
+        detail_news_media.title = request.data['title']
+        detail_news_media.description = request.data['description']
+        detail_news_media.media_uri = request.data['media_uri']
+        detail_news_media.updated_at = timezone.now()
+        detail_news_media.updated_by = request.user.nim
+        detail_news_media.save()
+
+        serializer = ResponseSerializer({
+            'code': 200,
+            'status': 'success',
+            'recordsTotal': 1,
+            'data': DetailNewsMediaSerializer(detail_news_media).data,
+            'error': None,
+        })
+
+        return Response(serializer.data)
+
+    def list(self, request, *args, **kwargs):
+        if request.query_params.get('id'):
+            detail_news_media = DetailNewsMedia.objects.get(id=request.query)
+            serializer = ResponseSerializer({
+                'code': 200,
+                'status': 'success',
+                'recordsTotal': 1,
+                'data': DetailNewsMediaSerializer(detail_news_media).data,
+                'error': None,
+            })
+
+            return Response(serializer.data)
+
+        queryset = self.filter_queryset(self.get_queryset())
+
+        serializer = ResponseSerializer({
+            'code': 200,
+            'status': 'success',
+            'recordsTotal': queryset.count(),
+            'data': DetailNewsMediaSerializer(queryset, many=True).data,
             'error': None,
         })
 
