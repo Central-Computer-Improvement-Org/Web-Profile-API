@@ -45,6 +45,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'users',
     'settings',
+    'news',
+    'django_filters',
 ]
 
 MIDDLEWARE = [
@@ -154,6 +156,7 @@ REST_FRAMEWORK = {
     'EXCEPTION_HANDLER': 'common.exceptions.global_exception_handler',
     'DATETIME_FORMAT': '%d-%m-%Y %H:%M',
     'DATE_FORMAT': '%d-%m-%Y',
+    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend']
 }
 
 # JWT settings
