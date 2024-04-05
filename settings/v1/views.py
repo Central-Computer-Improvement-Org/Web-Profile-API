@@ -4,13 +4,16 @@ from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError, NotFound
 from rest_framework.permissions import IsAuthenticated, AllowAny
+from django_filters.rest_framework import DjangoFilterBackend
 
-from auth.auth import IsSuperUser, IsPengurus
+from auth.auth import IsPengurus
+from common.orderings import KeywordOrderingFilter
 
 from generic_serializers.serializers import ResponseSerializer, GenericErrorSerializer
 
 from .serializers import SettingSerializer, ContactSerializer
 from ..models import Setting, Contact
+
 
 from copy import deepcopy
 
@@ -96,8 +99,13 @@ class PublicSettingViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
     
 class CMSContactViewSet(viewsets.ModelViewSet):
+    queryset = Contact.objects.all()
     serializer_class = ContactSerializer
     permission_classes = [IsAuthenticated]
+    filterset_fields = ['platform', 'created_at', 'updated_at']
+    filter_backends = [DjangoFilterBackend, KeywordOrderingFilter]
+    ordering_fields = ['created_at', 'updated_at']
+    ordering = ['created_at']
 
     def list(self, request, *args, **kwargs):
         if request.query_params.get('id'):
@@ -113,13 +121,13 @@ class CMSContactViewSet(viewsets.ModelViewSet):
 
             return Response(serializer.data)
 
-        contacts = Contact.objects.all()
+        queryset = self.filter_queryset(self.get_queryset())
 
         serializer = ResponseSerializer({
             'code': 200,
             'status': 'success',
-            'recordsTotal': contacts.count(),
-            'data': ContactSerializer(contacts, many=True).data,
+            'recordsTotal': queryset.count(),
+            'data': ContactSerializer(queryset, many=True).data,
             'error': None,
         })
 
