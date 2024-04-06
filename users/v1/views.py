@@ -50,13 +50,26 @@ class UserViewSet(viewsets.ModelViewSet):
     authentication_classes = [JWTAuthentication]
 
     def list(self, request, *args, **kwargs):
-        users = User.objects.all()
+        if request.query_params.get('nim'):
+            user = User.objects.get(nim=request.query_params.get('nim'))
+
+            serializer = ResponseSerializer({
+                'code': 200,
+                'status': 'success',
+                'recordsTotal': 1,
+                'data': UserSerializer(user).data,
+                'error': None,
+            })
+
+            return Response(serializer.data)
+
+        self.queryset = User.objects.all()
 
         serializer = ResponseSerializer({
             'code': 200,
             'status': 'success',
-            'recordsTotal': users.count(),
-            'data': UserSerializer(users, many=True).data,
+            'recordsTotal': self.queryset.count(),
+            'data': UserSerializer(self.queryset, many=True).data,
             'error': None,
         })
 
@@ -150,13 +163,13 @@ class PublicDivisionViewSet(viewsets.ModelViewSet):
 
             return Response(serializer.data)
 
-        divisions = Division.objects.all()
+        self.queryset = Division.objects.all()
 
         serializer = ResponseSerializer({
             'code': 200,
             'status': 'success',
-            'recordsTotal': divisions.count(),
-            'data': DivisionSerializer(divisions, many=True).data,
+            'recordsTotal': self.queryset.count(),
+            'data': DivisionSerializer(self.queryset, many=True).data,
             'error': None,
         })
 
