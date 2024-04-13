@@ -20,9 +20,8 @@ jobs:
                       cd "${{ secrets.APPLICATION_PATH }}"
                       git pull
                       tmux kill-session -t cci-web-profile-api
-                      tmux new -s cci-web-profile-api
+                      sudo kill $(sudo lsof -t -i:8000)
                       source cci_web_profile/bin/activate
                       pip install -r requirements.txt
-                      sudo kill $(sudo lsof -t -i:8000)
                       python3 manage.py runserver 0.0.0.0:8000
                       exit
