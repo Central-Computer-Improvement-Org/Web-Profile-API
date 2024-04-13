@@ -17,10 +17,11 @@ jobs:
                   username: ${{ secrets.SERVER_USERNAME }}
                   key: ${{ secrets.SSH_PRIVATE_KEY }}
                   script: |
-                      tmux kill-session -t cci-web-profile-api
                       cd "${{ secrets.APPLICATION_PATH }}"
                       git pull
-                      tmux new -s cci-web-profile-api
                       source cci_web_profile/bin/activate
                       pip install -r requirements.txt
+                      tmux kill-session -t cci-web-profile-api
+                      sudo kill $(sudo lsof -t -i:8000)
                       python3 manage.py runserver 0.0.0.0:8000
+                      exit
