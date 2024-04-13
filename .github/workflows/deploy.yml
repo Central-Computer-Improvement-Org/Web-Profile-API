@@ -13,7 +13,7 @@ jobs:
               uses: appleboy/ssh-action@master
               with:
                   host: ${{ secrets.SSH_HOST }}
-                  port: 22
+                  port: ${{ secrets.SERVER_PORT }}
                   username: ${{ secrets.SERVER_USERNAME }}
                   key: ${{ secrets.SSH_PRIVATE_KEY }}
                   script: |
@@ -23,7 +23,7 @@ jobs:
                       sudo kill $(sudo lsof -t -i:8000)
                       source cci_web_profile/bin/activate
                       pip install -r requirements.txt
-                      python3 manage.py runserver 0.0.0.0:8000 > /dev/null 2>&1 &
+                      python3 manage.py runserver ${{ secrets.APPLICATION_HOST }}:${{ secrets.APPLICATION_PORT }} > /dev/null 2>&1 &
             - name: Wait for server to start
               run: sleep 10s
 
