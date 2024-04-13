@@ -23,5 +23,5 @@ jobs:
                       pip install -r requirements.txt
                       tmux kill-session -t cci-web-profile-api
                       sudo kill $(sudo lsof -t -i:8000)
-                      python3 manage.py runserver 0.0.0.0:8000
+                      python3 manage.py runserver 0.0.0.0:8000 --noreload
                       exit
