@@ -24,4 +24,8 @@ jobs:
                       source cci_web_profile/bin/activate
                       pip install -r requirements.txt
                       python3 manage.py runserver 0.0.0.0:8000
-                      exit
+            - name: Wait for server to start
+              run: sleep 10s
+
+            - name: End workflow
+              run: exit 0
