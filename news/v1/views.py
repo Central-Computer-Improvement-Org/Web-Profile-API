@@ -22,7 +22,7 @@ class CMSNewsViewSet(viewsets.ModelViewSet):
     queryset = News.objects.all()
     serializer_class = NewsSerializer
     permission_classes = [IsPengurus]
-    filterset_fields = ['title', 'created_at', 'updatedAt']
+    filterset_fields = ['title', 'created_at', 'updated_at']
     filter_backends = [DjangoFilterBackend, KeywordOrderingFilter]
     filterset_class = NewsFilter
     ordering_fields = ['created_at', 'updated_at']
