@@ -22,7 +22,6 @@ class CMSNewsViewSet(viewsets.ModelViewSet):
     queryset = News.objects.all()
     serializer_class = NewsSerializer
     permission_classes = [IsPengurus]
-    filterset_fields = ['title', 'created_at', 'updated_at']
     filter_backends = [DjangoFilterBackend, KeywordOrderingFilter]
     filterset_class = NewsFilter
     ordering_fields = ['created_at', 'updated_at']
@@ -62,12 +61,14 @@ class CMSNewsViewSet(viewsets.ModelViewSet):
         if request.query_params.get('id') is None:
             raise ValueError('ID is required')
 
-        news = News.objects.get(pk=request.query_params['id'])
+        news = News.objects.get(id=request.query_params['id'])
         serializer = self.get_serializer(instance=news, data=request.data, partial=True,
                                          context={'request': request})
 
         if not serializer.is_valid():
             raise ValidationError(serializer.errors)
+
+        serializer.save()
 
         serializer = ResponseSerializer({
             'code': 200,
@@ -109,6 +110,11 @@ class CMSNewsViewSet(viewsets.ModelViewSet):
 class PublicNewsViewSet(viewsets.ModelViewSet):
     serializer_class = NewsSerializer
     permission_classes = [AllowAny]
+    queryset = News.objects.filter(is_published=True)
+    filter_backends = [DjangoFilterBackend, KeywordOrderingFilter]
+    filterset_class = NewsFilter
+    ordering_fields = ['created_at', 'updated_at']
+    ordering = ['created_at']
 
     def list(self, request, *args, **kwargs):
         if request.query_params.get('id'):
@@ -124,10 +130,12 @@ class PublicNewsViewSet(viewsets.ModelViewSet):
 
             return Response(serializer.data)
 
+        queryset = self.filter_queryset(self.get_queryset())
+
         serializer = ResponseSerializer({
             'code': 200,
             'status': 'success',
-            'recordsTotal': self.queryset.count(),
+            'recordsTotal': queryset.count(),
             'data': NewsSerializer(self.queryset, many=True).data,
             'error': None,
         })

@@ -5,6 +5,7 @@ from common.utils import rename_image_file
 from news.detail_news_media import DetailNewsMedia
 from news.models import News
 
+import copy
 
 class NewsSerializer(serializers.ModelSerializer):
     media_uri = serializers.ImageField(required=False)
@@ -20,6 +21,7 @@ class NewsSerializer(serializers.ModelSerializer):
             'updated_at',
             'created_by',
             'updated_by',
+            'is_published',
         ]
 
         read_only_fields = [
@@ -36,11 +38,16 @@ class NewsSerializer(serializers.ModelSerializer):
         ]
 
     def to_internal_value(self, data):
-        if 'mediaUri' in data:
-            data['media_uri'] = data.get('mediaUri', None)
-            data['media_uri'] = rename_image_file(data['media_uri'], prefix="NWS")
+        new_data = copy.deepcopy(data)
 
-        return super().to_internal_value(data)
+        if 'mediaUri' in data:
+            new_data['media_uri'] = data.get('mediaUri', None)
+            new_data['media_uri'] = rename_image_file(data['media_uri'], prefix="NWS")
+
+        if 'isPublished' in data:
+            new_data['is_published'] = data.get('isPublished', None)
+
+        return super().to_internal_value(new_data)
 
     def to_representation(self, instance):
         response = super().to_representation(instance)
@@ -48,6 +55,9 @@ class NewsSerializer(serializers.ModelSerializer):
         response['mediaUri'] = response.pop('media_uri', None)
         response['createdAt'] = response.pop('created_at', None)
         response['updatedAt'] = response.pop('updated_at', None)
+        response['createdBy'] = response.pop('created_by', None)
+        response['updatedBy'] = response.pop('updated_by', None)
+        response['isPublished'] = response.pop('is_published', None)
 
         return response
 

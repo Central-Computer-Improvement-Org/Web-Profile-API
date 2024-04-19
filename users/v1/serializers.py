@@ -6,6 +6,8 @@ from rest_framework import serializers
 from ..models import User, Role
 from ..models_divisions import Division
 
+import copy
+
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -65,28 +67,30 @@ class UserSerializer(serializers.ModelSerializer):
         return fields
 
     def to_internal_value(self, data):
+        new_data = copy.deepcopy(data)
+
         if 'roleId' in data:
-            data['role_id'] = data.get('roleId', None)
+            new_data['role_id'] = data.get('roleId', None)
         if 'divisionId' in data:
-            data['division_id'] = data.get('divisionId', None)
+            new_data['division_id'] = data.get('divisionId', None)
         if 'phoneNumber' in data:
-            data['phone_number'] = data.get('phoneNumber', None)
+            new_data['phone_number'] = data.get('phoneNumber', None)
         if 'profileUri' in data:
-            data['profile_uri'] = data.get('profileUri', None)
+            new_data['profile_uri'] = data.get('profileUri', None)
         if 'yearUniversityEnrolled' in data:
-            data['year_university_enrolled'] = data.get('yearUniversityEnrolled', None)
+            new_data['year_university_enrolled'] = data.get('yearUniversityEnrolled', None)
         if 'yearCommunityEnrolled' in data:
-            data['year_community_enrolled'] = data.get('yearCommunityEnrolled', None)
+            new_data['year_community_enrolled'] = data.get('yearCommunityEnrolled', None)
         if 'linkedinUri' in data:
-            data['linkedin_uri'] = data.get('linkedinUri', None)
+            new_data['linkedin_uri'] = data.get('linkedinUri', None)
 
-        if 'year_university_enrolled' in data:
-            data['year_university_enrolled'] = datetime.strptime(data['year_university_enrolled'], '%d-%m-%Y').date()
+        if 'year_university_enrolled' in new_data:
+            new_data['year_university_enrolled'] = datetime.strptime(data['year_university_enrolled'], '%d-%m-%Y').date()
 
-        if 'year_community_enrolled' in data:
-            data['year_community_enrolled'] = datetime.strptime(data['year_community_enrolled'], '%d-%m-%Y').date()
+        if 'year_community_enrolled' in new_data:
+            new_data['year_community_enrolled'] = datetime.strptime(data['year_community_enrolled'], '%d-%m-%Y').date()
 
-        return super().to_internal_value(data)
+        return super().to_internal_value(new_data)
 
     def create(self, validated_data):
         validated_data['password'] = make_password(validated_data.get('password'))
