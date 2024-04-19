@@ -1,6 +1,7 @@
 from django.core.exceptions import BadRequest
 from django.utils import timezone
 from rest_framework import viewsets
+from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework_simplejwt.authentication import JWTAuthentication
@@ -75,6 +76,30 @@ class UserViewSet(viewsets.ModelViewSet):
 
         return Response(serializer.data)
 
+    def update(self, request, *args, **kwargs):
+        if request.query_params.get('nim') is None:
+            raise ValueError('NIM is required')
+
+        user = User.objects.get(nim=request.query_params['nim'])
+        serializer = UserSerializer(user, data=request.data, partial=True, context={
+            'request': request
+        })
+
+        if serializer.is_valid():
+            serializer.save()
+
+            response = ResponseSerializer({
+                'code': 200,
+                'status': 'success',
+                'recordsTotal': 1,
+                'data': None,
+                'error': None,
+            })
+
+            return Response(response.data)
+        else:
+            raise ValidationError(serializer.errors)
+
 
 class CMSDivisionViewSet(viewsets.ModelViewSet):
     serializer_class = DivisionSerializer
@@ -129,16 +154,20 @@ class CMSDivisionViewSet(viewsets.ModelViewSet):
             raise ValueError('ID is required')
 
         division = Division.objects.get(id=request.query_params['id'])
-        division.name = request.data['name']
-        division.updated_at = timezone.now()
-        division.updated_by = request.user.nim
-        division.save()
+
+        serializer = DivisionSerializer(division, data=request.data, partial=True,
+                                        context={'request': request})
+
+        if not serializer.is_valid():
+            raise ValidationError(serializer.errors)
+
+        serializer.save()
 
         serializer = ResponseSerializer({
             'code': 200,
             'status': 'success',
             'recordsTotal': 1,
-            'data': DivisionSerializer(division).data,
+            'data': None,
             'error': None,
         })
 

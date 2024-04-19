@@ -54,6 +54,16 @@ class UserSerializer(serializers.ModelSerializer):
             'updated_by'
         ]
 
+    def get_fields(self):
+        fields = super(UserSerializer, self).get_fields()
+
+        request = self.context.get('request', None)
+        if request and getattr(request, 'method', None) == "PATCH":
+            for field in self.Meta.required_fields:
+                fields[field].required = False
+
+        return fields
+
     def to_internal_value(self, data):
         if 'roleId' in data:
             data['role_id'] = data.get('roleId', None)
@@ -70,10 +80,10 @@ class UserSerializer(serializers.ModelSerializer):
         if 'linkedinUri' in data:
             data['linkedin_uri'] = data.get('linkedinUri', None)
 
-        if data['year_university_enrolled']:
+        if 'year_university_enrolled' in data:
             data['year_university_enrolled'] = datetime.strptime(data['year_university_enrolled'], '%d-%m-%Y').date()
 
-        if data['year_community_enrolled']:
+        if 'year_community_enrolled' in data:
             data['year_community_enrolled'] = datetime.strptime(data['year_community_enrolled'], '%d-%m-%Y').date()
 
         return super().to_internal_value(data)
@@ -106,6 +116,12 @@ class UserSerializer(serializers.ModelSerializer):
         response['updatedBy'] = response.pop('updated_by', None)
 
         return response
+
+    def update(self, instance, validated_data):
+        validated_data['updated_at'] = datetime.now()
+        validated_data['updated_by'] = self.context['request'].user.nim
+
+        return super(UserSerializer, self).update(instance, validated_data)
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
@@ -145,3 +161,10 @@ class DivisionSerializer(serializers.ModelSerializer):
             validated_data['updated_by'] = "system"
 
         return super(DivisionSerializer, self).create(validated_data)
+
+
+    def update(self, instance, validated_data):
+        validated_data['updated_at'] = datetime.now()
+        validated_data['updated_by'] = self.context['request'].user.nim
+
+        return super(DivisionSerializer, self).update(instance, validated_data)
