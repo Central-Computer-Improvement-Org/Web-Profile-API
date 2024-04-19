@@ -14,12 +14,11 @@ class NewsFilter(django_filters.FilterSet):
     dateField_value = "created_at"
 
     def filter_dateField(self, queryset, name, value):
-        if value == 'updated_at':
+        if value == 'updatedAt':
             self.dateField_value = "updated_at"
         else:
-            value = "created_at"
+            self.dateField_value = "created_at"
 
-        self.dateField_value = value
         return queryset
 
     def filter_startDate(self, queryset, name, value):
