@@ -42,7 +42,7 @@ class NewsSerializer(serializers.ModelSerializer):
 
         if 'mediaUri' in data:
             new_data['media_uri'] = data.get('mediaUri', None)
-            new_data['media_uri'] = rename_image_file(data['media_uri'], prefix="NWS")
+            new_data['media_uri'] = rename_image_file(new_data['media_uri'], prefix="NWS")
 
         if 'isPublished' in data:
             new_data['is_published'] = data.get('isPublished', None)
@@ -113,13 +113,16 @@ class DetailNewsMediaSerializer(serializers.ModelSerializer):
         ]
 
     def to_internal_value(self, data):
+        new_data = copy.deepcopy(data)
+
         if 'mediaUri' in data:
-            data['media_uri'] = data.get('mediaUri', None)
-            data['media_uri'] = rename_image_file(data['media_uri'], prefix="STG")
+            new_data['media_uri'] = data.get('mediaUri', None)
+            new_data['media_uri'] = rename_image_file(new_data['media_uri'], prefix="STG")
 
-        data['news_id'] = data.get('newsId', None)
+        if 'newsId' in data:
+            new_data['news_id'] = data.get('newsId', None)
 
-        return super().to_internal_value(data)
+        return super().to_internal_value(new_data)
 
     def to_representation(self, instance):
         response = super().to_representation(instance)

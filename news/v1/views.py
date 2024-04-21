@@ -14,7 +14,7 @@ from common.utils import rename_image_file
 from generic_serializers.serializers import ResponseSerializer
 from news.detail_news_media import DetailNewsMedia
 from news.news_models import News
-from news.v1.filtersets import NewsFilter
+from news.v1.filtersets import NewsFilter, NewsMediaFilter
 from news.v1.serializers import NewsSerializer, DetailNewsMediaSerializer
 
 
@@ -149,6 +149,7 @@ class CMSDetailNewsMediaViewSet(viewsets.ModelViewSet):
     permission_classes = [IsPengurus]
     filterset_fields = ['title', 'created_at', 'updated_at']
     filter_backends = [DjangoFilterBackend, KeywordOrderingFilter]
+    filterset_class = NewsMediaFilter
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['created_at']
 
@@ -193,7 +194,7 @@ class CMSDetailNewsMediaViewSet(viewsets.ModelViewSet):
         if not serializer.is_valid():
             raise ValidationError(serializer.errors)
 
-        super(CMSDetailNewsMediaViewSet, self).update(request, *args, **kwargs)
+        serializer.save()
 
         serializer = ResponseSerializer({
             'code': 200,
