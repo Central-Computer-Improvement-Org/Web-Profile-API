@@ -7,6 +7,7 @@ from .v1.views import UserProfileViewSet, UserViewSet, CMSDivisionViewSet, Publi
 urlpatterns_v1_cms = [
     path('', UserViewSet.as_view({
         'get': 'list',
+        'patch': 'update',
     }), name='users'),
 
     path("divisions/", CMSDivisionViewSet.as_view({
