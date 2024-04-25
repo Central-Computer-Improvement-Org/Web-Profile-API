@@ -23,6 +23,7 @@ jobs:
                       sudo kill $(sudo lsof -t -i:8000)
                       source cci_web_profile/bin/activate
                       pip install -r requirements.txt
+                      python3 manage.py migrate
                       python3 manage.py runserver ${{ secrets.APPLICATION_HOST }}:${{ secrets.APPLICATION_PORT }} > /dev/null 2>&1 &
             - name: Wait for server to start
               run: sleep 10s
