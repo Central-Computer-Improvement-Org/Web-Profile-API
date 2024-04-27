@@ -11,6 +11,7 @@ class NewsFilter(django_filters.FilterSet):
     startDate = django_filters.CharFilter(method='filter_startDate')
     endDate = django_filters.CharFilter(method='filter_endDate')
     title = django_filters.CharFilter(field_name='title', lookup_expr='icontains')
+    isPublished = django_filters.BooleanFilter(field_name='is_published')
 
     dateField_value = "created_at"
 

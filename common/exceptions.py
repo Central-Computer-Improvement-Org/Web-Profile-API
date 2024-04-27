@@ -1,4 +1,5 @@
-from rest_framework.exceptions import AuthenticationFailed, NotFound, PermissionDenied, MethodNotAllowed, NotAuthenticated, ParseError
+from rest_framework.exceptions import AuthenticationFailed, NotFound, PermissionDenied, MethodNotAllowed, \
+    NotAuthenticated, ParseError
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 from rest_framework_simplejwt.views import TokenViewBase
 from rest_framework.response import Response
@@ -12,6 +13,7 @@ from django.db.models import ObjectDoesNotExist
 
 from django.http import Http404
 
+
 def jwt_exception_handler(request, exc):
     response = ResponseSerializer({
         'code': 401,
@@ -19,7 +21,7 @@ def jwt_exception_handler(request, exc):
         'recordsTotal': 0,
         'data': None,
         'error': GenericErrorSerializer({
-            'name': exc.__name__,
+            'name': exc.__class__.__name__,
             'message': exc.default_detail,
             'validation': None,
         }).data
@@ -95,6 +97,7 @@ def not_found_exception_handler(request, exc):
 
     return Response(response.data, status=status.HTTP_404_NOT_FOUND)
 
+
 def method_not_allowed_exception_handler(request, exc):
     response = ResponseSerializer({
         'code': 405,
@@ -124,37 +127,27 @@ def bad_request_exception_handler(request, exc):
 
     return Response(response.data, status=status.HTTP_400_BAD_REQUEST)
 
+
 def global_exception_handler(exc, context):
     request = context['request']
     response = None
 
-    print(exc.__class__)
+    err_map = {
+        'ValidationError': validation_exception_handler,
+        'AuthenticationFailed': jwt_exception_handler,
+        'InvalidToken': jwt_exception_handler,
+        'TokenError': jwt_exception_handler,
+        'NotFound': not_found_exception_handler,
+        'PermissionDenied': jwt_exception_handler,
+        'ValueError': bad_request_exception_handler,
+        'ObjectDoesNotExist': not_found_exception_handler,
+        'NotAuthenticated': unauthorized_exception_handler,
+        'ParseError': bad_request_exception_handler,
+        'Http404': not_found_exception_handler,
+        'DoesNotExist': not_found_exception_handler,
+        'MethodNotAllowed': method_not_allowed_exception_handler,
+    }
 
-    if isinstance(exc, ValidationError):
-        response = validation_exception_handler(request, exc)
-    elif isinstance(exc, AuthenticationFailed):
-        response = jwt_exception_handler(request, AuthenticationFailed)
-    elif isinstance(exc, InvalidToken):
-        response = jwt_exception_handler(exc, InvalidToken)
-    elif isinstance(exc, TokenError):
-        response = jwt_exception_handler(exc, TokenError)
-    elif isinstance(exc, NotFound):
-        response = not_found_exception_handler(request, exc)
-    elif isinstance(exc, PermissionDenied):
-        response = jwt_exception_handler(exc, PermissionDenied)
-    elif isinstance(exc, ValueError):
-        response = bad_request_exception_handler(request, exc)
-    elif isinstance(exc, ObjectDoesNotExist):
-        response = not_found_exception_handler(request, exc)
-    elif isinstance(exc, NotAuthenticated):
-        response = unauthorized_exception_handler(request, exc)
-    elif isinstance(exc, ParseError):
-        response = bad_request_exception_handler(request, exc)
-    elif isinstance(exc, Http404):
-        response = not_found_exception_handler(request, exc)
-    elif isinstance(exc, MethodNotAllowed):
-        response = method_not_allowed_exception_handler(request, exc)
-    else:
-        response = server_error_exception_handler(request, exc)
+    response = err_map.get(exc.__class__.__name__, server_error_exception_handler)(request, exc)
 
     return response
