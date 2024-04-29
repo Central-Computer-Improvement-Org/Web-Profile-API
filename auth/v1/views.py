@@ -42,7 +42,15 @@ class JwtObtain(TokenObtainPairView):
 
         response = super().post(request, *args, **kwargs)
 
-        return response
+        serializer = ResponseSerializer({
+            'code': 200,
+            'status': 'success',
+            'recordsTotal': 1,
+            'data': response.data,
+            'error': None,
+        })
+
+        return Response(serializer.data)
 
 
 class RegisterViewSet(viewsets.ModelViewSet):

@@ -4,7 +4,7 @@ from django.utils import timezone
 from django_filters import OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
-from rest_framework.exceptions import ValidationError
+from rest_framework.exceptions import ValidationError, NotFound
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
@@ -120,15 +120,18 @@ class PublicNewsViewSet(viewsets.ModelViewSet):
         if request.query_params.get('id'):
             news = News.objects.get(id=request.query_params.get('id'))
 
-            serializer = ResponseSerializer({
-                'code': 200,
-                'status': 'success',
-                'recordsTotal': 1,
-                'data': NewsSerializer(news).data,
-                'error': None,
-            })
+            if news.is_published:
+                serializer = ResponseSerializer({
+                    'code': 200,
+                    'status': 'success',
+                    'recordsTotal': 1,
+                    'data': NewsSerializer(news).data,
+                    'error': None,
+                })
 
-            return Response(serializer.data)
+                return Response(serializer.data)
+
+            raise NotFound('News not found')
 
         queryset = self.filter_queryset(self.get_queryset())
 

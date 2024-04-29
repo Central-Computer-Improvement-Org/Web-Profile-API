@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'users',
     'settings',
     'news',
+    'events',
     'projects',
     'django_filters',
 ]
