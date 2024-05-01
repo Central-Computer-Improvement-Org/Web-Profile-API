@@ -1,12 +1,18 @@
 from django_filters.rest_framework import DjangoFilterBackend
+from django.db import transaction
 
 from rest_framework import viewsets
+from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError, NotFound
 from rest_framework.permissions import IsAuthenticated, AllowAny
 
 from auth.auth import IsPengurus
 from common.orderings import KeywordOrderingFilter
+from common.utils import id_generator
+from copy import copy
+
+from projects.v1.filtersets import ProjectFilter, ProjectSearchFilter
 
 from generic_serializers.serializers import ResponseSerializer
 
@@ -14,13 +20,24 @@ from .serializers import ProjectSerializer, DetailContributorProjectSerializer
 from ..models import Project, DetailContributorProject
 
 class CMSProjectViewSet(viewsets.ModelViewSet):
-    queryset = Project.objects.all()
-    serializer_class = ProjectSerializer
+    project_queryset = Project.objects.all()
+    contributor_queryset = DetailContributorProject.objects.all()
+    project_serializer_class = ProjectSerializer
+    contributor_serializer_class = DetailContributorProjectSerializer
     permission_classes = [IsAuthenticated]
-    filterset_fields = ['name', 'created_at', 'updated_at']
-    filter_backends = [DjangoFilterBackend, KeywordOrderingFilter]
+    filterset_class = ProjectFilter
+    filter_backends = [DjangoFilterBackend, KeywordOrderingFilter, ProjectSearchFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['created_at']
+
+    def get_serializer_class(self):
+        if self.action == 'create' or self.action == 'update' or self.action == 'list' or self.action == 'retrieve':
+            return self.project_serializer_class
+        else:
+            return super().get_serializer_class()
+        
+    def get_queryset(self):
+        return self.project_queryset
 
     def list(self, request, *args, **kwargs):
         if request.query_params.get('id'):
@@ -36,7 +53,7 @@ class CMSProjectViewSet(viewsets.ModelViewSet):
 
             return Response(serializer.data)
 
-        queryset = self.filter_queryset(self.get_queryset())
+        queryset = self.filter_queryset(self.get_queryset().prefetch_related('contributors'))
 
         serializer = ResponseSerializer({
             'code': 200,
@@ -49,32 +66,30 @@ class CMSProjectViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
     
     def create(self, request, *args, **kwargs):
-        data = request.data.copy()
-        serializer = self.get_serializer(data=data)
-        detail_contributor_serializer = DetailContributorProjectSerializer(data=data.get('detailContributors', []), many=True)
+        serializerProject = super(CMSProjectViewSet, self).create(request, *args, **kwargs)
+        project_instance = serializerProject.data
 
-        if not serializer.is_valid():
-            raise ValidationError(serializer.errors)
-        
-        if not detail_contributor_serializer.is_valid():
-            raise ValidationError(detail_contributor_serializer.errors)
-        
-        self.perform_create(serializer)
+        members = request.data.getlist('contributors')
 
-        project_instance = serializer.instance
-        for detail_contributor_data in detail_contributor_serializer.validated_data:
-            detail_contributor_data['project_id'] = project_instance.id
-        detail_contributors = DetailContributorProject.objects.bulk_create([DetailContributorProject(**data) for data in detail_contributor_serializer.validated_data])
+        if members is not None:
+            for member in members:
+                detail_contributor_data = {
+                    'member_nim': member,
+                    'project_id': project_instance['id'],  
+                }
 
-        project_data = project_serializer.data
-        project_data['detail_contributors'] = [serializer.data for serializer in detail_contributor_serializer]
+                detail_contributor_serializer = DetailContributorProjectSerializer(data=detail_contributor_data, context=self.get_serializer_context())
 
-        
+                if detail_contributor_serializer.is_valid():
+                    detail_contributor_serializer.save()
+
+        project = Project.objects.get(id=project_instance['id'])
+                
         resp = ResponseSerializer({
             'code': 201,
             'status': 'success',
             'recordsTotal': 1,
-            'data': serializer.data,
+            'data': ProjectSerializer(project,many=False).data,
             'error': None,
         })
 
@@ -87,14 +102,27 @@ class CMSProjectViewSet(viewsets.ModelViewSet):
             raise ValueError('ID is required')
         
         try:
-            project = Project.objects.get(id=id)
-            data = request.data.copy()
-            serializer = self.get_serializer(project, data=data, partial=True)
+            project = Project.objects.get(id=request.query_params['id'])
+            project_serializer = self.get_serializer(instance=project, data=request.data, partial=True, context={'request': request})
 
-            if not serializer.is_valid():
-                raise ValidationError(serializer.errors)
-            
-            self.perform_update(serializer)
+            if not project_serializer.is_valid():
+                raise ValidationError(project_serializer.errors)
+
+            with transaction.atomic():
+                project_serializer.save()
+
+                members = request.data.getlist('contributors')
+                
+                if len(members) > 0:
+                    DetailContributorProject.objects.filter(project_id=id).delete()
+                    for member in members:
+                        detail_contributor_data = {
+                            'member_nim': member,
+                            'project_id': id,  
+                        }
+                        detail_contributor_serializer = DetailContributorProjectSerializer(data=detail_contributor_data, context=self.get_serializer_context())
+                        if detail_contributor_serializer.is_valid():
+                            detail_contributor_serializer.save()
                     
             resp = ResponseSerializer({
                 'code': 204,
@@ -117,6 +145,8 @@ class CMSProjectViewSet(viewsets.ModelViewSet):
         
         try:
             project = Project.objects.get(id=id)
+
+            DetailContributorProject.objects.filter(project_id=id).delete()
 
             self.perform_destroy(project)
 
@@ -134,8 +164,13 @@ class CMSProjectViewSet(viewsets.ModelViewSet):
             raise NotFound('Project does not exist!')
 
 class PublicProjectViewSet(viewsets.ModelViewSet):
+    queryset = Project.objects.all()
     serializer_class = ProjectSerializer
     permission_classes = [AllowAny]
+    filterset_class = ProjectFilter
+    filter_backends = [DjangoFilterBackend, KeywordOrderingFilter, ProjectSearchFilter]
+    ordering_fields = ['created_at', 'updated_at']
+    ordering = ['created_at']
 
     def list(self, request, *args, **kwargs):
         if request.query_params.get('id'):
@@ -151,190 +186,13 @@ class PublicProjectViewSet(viewsets.ModelViewSet):
 
             return Response(serializer.data)
 
-        projects = Project.objects.all()
-
-        serializer = ResponseSerializer({
-            'code': 200,
-            'status': 'success',
-            'recordsTotal': projects.count(),
-            'data': ProjectSerializer(projects, many=True).data,
-            'error': None,
-        })
-
-        return Response(serializer.data)
-
-class CMSDetailContributorProjectViewSet(viewsets.ModelViewSet):
-    queryset = DetailContributorProject.objects.all()
-    serializer_class = DetailContributorProjectSerializer
-    permission_classes = [IsAuthenticated]
-    filterset_fields = ['member_nim', 'project_id', 'created_at', 'updated_at']
-    filter_backends = [DjangoFilterBackend, KeywordOrderingFilter]
-    ordering_fields = ['member_nim', 'project_id', 'created_at', 'updated_at']
-    ordering = ['created_at']
-
-    def list(self, request, *args, **kwargs):
-        if request.query_params.get('id'):
-            detailContributorProject = DetailContributorProject.objects.get(id=request.query_params.get('id'))
-
-            serializer = ResponseSerializer({
-                'code': 200,
-                'status': 'success',
-                'recordsTotal': 1,
-                'data': ProjectSerializer(detailContributorProject).data,
-                'error': None,
-            })
-
-            return Response(serializer.data)
-
-        queryset = self.filter_queryset(self.get_queryset())
+        queryset = self.filter_queryset(self.get_queryset().prefetch_related('contributors'))
 
         serializer = ResponseSerializer({
             'code': 200,
             'status': 'success',
             'recordsTotal': queryset.count(),
-            'data': DetailContributorProjectSerializer(queryset, many=True).data,
-            'error': None,
-        })
-
-        return Response(serializer.data)
-    
-    def create(self, request, *args, **kwargs):
-        data = request.data.copy()
-        serializer = self.get_serializer(data=data)
-
-        if not serializer.is_valid():
-            raise ValidationError(serializer.errors)
-        
-        self.perform_create(serializer)
-        
-        resp = ResponseSerializer({
-            'code': 201,
-            'status': 'success',
-            'recordsTotal': 1,
-            'data': serializer.data,
-            'error': None,
-        })
-
-        return Response(resp.data)
-    
-    def update(self, request, *args, **kwargs):
-        id = request.query_params.get('id', None)
-
-        if id is None:
-            raise ValueError('ID is required')
-        
-        try:
-            detailContributorProject = DetailContributorProject.objects.get(id=id)
-            data = request.data.copy()
-            serializer = self.get_serializer(detailContributorProject, data=data, partial=True)
-
-            if not serializer.is_valid():
-                raise ValidationError(serializer.errors)
-            
-            self.perform_update(serializer)
-                    
-            resp = ResponseSerializer({
-                'code': 204,
-                'status': 'success',
-                'recordsTotal': 1,
-                'data': ProjectSerializer(detailContributorProject).data,
-                'error': None,
-            })
-
-            return Response(resp.data)
-        
-        except DetailContributorProject.DoesNotExist:
-            raise NotFound('Detail Contributor Project does not exist!')
-        
-    def destroy(self, request, *args, **kwargs):
-        if request.query_params.get('id'):
-            try:
-                id = request.query_params.get('id')
-                detailContributorProject = DetailContributorProject.objects.get(id=id)
-
-                self.perform_destroy(detailContributorProject)
-
-                resp = ResponseSerializer({
-                    'code': 204,
-                    'status': 'success',
-                    'recordsTotal': 0,
-                    'data': None,
-                    'error': None,
-                })
-
-                return Response(resp.data)
-        
-            except DetailContributorProject.DoesNotExist:
-                raise NotFound('Detail Contributor Project does not exist!')
-        elif request.query_params.get('memberNim'):
-            try:
-                member_nim = request.query_params.get('memberNim')
-                detailContributorProjects = DetailContributorProject.objects.get(member_nim=member_nim)
-
-                self.perform_destroy(detailContributorProjects)
-
-                resp = ResponseSerializer({
-                    'code': 204,
-                    'status': 'success',
-                    'recordsTotal': 0,
-                    'data': None,
-                    'error': None,
-                })
-
-                return Response(resp.data)
-        
-            except DetailContributorProject.DoesNotExist:
-                raise NotFound('Detail Contributor Project does not exist!')
-            
-        elif request.query_params.get('projectId'):
-            try:
-                project_id = request.query_params.get('projectId')
-                detailContributorProjects = DetailContributorProject.objects.get(project_id=project_id)
-
-                self.perform_destroy(detailContributorProjects)
-
-                resp = ResponseSerializer({
-                    'code': 204,
-                    'status': 'success',
-                    'recordsTotal': 0,
-                    'data': None,
-                    'error': None,
-                })
-
-                return Response(resp.data)
-        
-            except DetailContributorProject.DoesNotExist:
-                raise NotFound('Detail Contributor Project does not exist!')
-            
-        else:
-            raise ValueError('id/projectId/memberNim is required')
-
-        
-class PublicDetailContributorProjectViewSet(viewsets.ModelViewSet):
-    serializer_class = DetailContributorProjectSerializer
-    permission_classes = [AllowAny]
-
-    def list(self, request, *args, **kwargs):
-        if request.query_params.get('id'):
-            detailContributorProject = DetailContributorProject.objects.get(id=request.query_params.get('id'))
-
-            serializer = ResponseSerializer({
-                'code': 200,
-                'status': 'success',
-                'recordsTotal': 1,
-                'data': DetailContributorProjectSerializer(detailContributorProject).data,
-                'error': None,
-            })
-
-            return Response(serializer.data)
-
-        detailContributorProjects = DetailContributorProject.objects.all()
-
-        serializer = ResponseSerializer({
-            'code': 200,
-            'status': 'success',
-            'recordsTotal': detailContributorProjects.count(),
-            'data': DetailContributorProjectSerializer(detailContributorProjects, many=True).data,
+            'data': ProjectSerializer(queryset, many=True).data,
             'error': None,
         })
 
