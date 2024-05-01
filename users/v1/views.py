@@ -1,3 +1,4 @@
+import django_filters.rest_framework
 from django.core.exceptions import BadRequest
 from django.utils import timezone
 from rest_framework import viewsets
@@ -9,6 +10,7 @@ from rest_framework.serializers import ListSerializer
 
 from generic_serializers.serializers import ResponseSerializer, GenericErrorSerializer
 from auth.auth import IsSuperUser, IsPengurus
+from . import filtersets
 
 from .serializers import UserSerializer, DivisionSerializer
 from ..models import User
@@ -47,8 +49,11 @@ class UserProfileViewSet(viewsets.ModelViewSet):
 
 
 class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
     permission_classes = [IsPengurus]
     authentication_classes = [JWTAuthentication]
+    filter_backends = [filtersets.UserSearchFilter, django_filters.rest_framework.DjangoFilterBackend]
+    filterset_class = filtersets.UserFilterSet
 
     def list(self, request, *args, **kwargs):
         if request.query_params.get('nim'):
@@ -64,13 +69,13 @@ class UserViewSet(viewsets.ModelViewSet):
 
             return Response(serializer.data)
 
-        self.queryset = User.objects.all()
+        queryset = self.filter_queryset(self.get_queryset())
 
         serializer = ResponseSerializer({
             'code': 200,
             'status': 'success',
-            'recordsTotal': self.queryset.count(),
-            'data': UserSerializer(self.queryset, many=True).data,
+            'recordsTotal': queryset.count(),
+            'data': UserSerializer(queryset, many=True).data,
             'error': None,
         })
 

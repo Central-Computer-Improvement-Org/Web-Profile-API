@@ -85,10 +85,10 @@ class UserSerializer(serializers.ModelSerializer):
             new_data['linkedin_uri'] = data.get('linkedinUri', None)
 
         if 'year_university_enrolled' in new_data:
-            new_data['year_university_enrolled'] = datetime.strptime(data['year_university_enrolled'], '%d-%m-%Y').date()
+            new_data['year_university_enrolled'] = datetime.strptime(new_data['year_university_enrolled'], '%d-%m-%Y').date()
 
         if 'year_community_enrolled' in new_data:
-            new_data['year_community_enrolled'] = datetime.strptime(data['year_community_enrolled'], '%d-%m-%Y').date()
+            new_data['year_community_enrolled'] = datetime.strptime(new_data['year_community_enrolled'], '%d-%m-%Y').date()
 
         return super().to_internal_value(new_data)
 

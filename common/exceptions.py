@@ -33,11 +33,17 @@ def jwt_exception_handler(request, exc):
 def validation_exception_handler(request, exc: ValidationError):
     val_errors = []
 
-    for key, value in exc.detail.items():
+    if not hasattr(exc, 'detail'):
         val_errors.append(ValidationErrorSerializer({
-            'name': key,
-            'message': value[0]
+            'name': 'Validation Error',
+            'message': 'Validation error occurred'
         }).data)
+    else:
+        for key, value in exc.detail.items():
+            val_errors.append(ValidationErrorSerializer({
+                'name': key,
+                'message': value[0]
+            }).data)
 
     response = ResponseSerializer({
         'code': 400,
@@ -45,7 +51,7 @@ def validation_exception_handler(request, exc: ValidationError):
         'recordsTotal': 0,
         'error': GenericErrorSerializer({
             'name': exc.__class__.__name__,
-            'message': exc.default_detail,
+            'message': exc.default_detail if hasattr(exc, 'default_detail') else exc,
             'validation': val_errors
         }).data
     })
