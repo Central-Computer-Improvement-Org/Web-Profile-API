@@ -14,7 +14,7 @@ from common.utils import rename_image_file
 from generic_serializers.serializers import ResponseSerializer
 from news.detail_news_media import DetailNewsMedia
 from news.news_models import News
-from news.v1.filtersets import NewsFilter, NewsMediaFilter
+from news.v1.filtersets import NewsFilter, NewsMediaFilter, NewsSearchFilter
 from news.v1.serializers import NewsSerializer, DetailNewsMediaSerializer
 
 
@@ -22,7 +22,7 @@ class CMSNewsViewSet(viewsets.ModelViewSet):
     queryset = News.objects.all()
     serializer_class = NewsSerializer
     permission_classes = [IsPengurus]
-    filter_backends = [DjangoFilterBackend, KeywordOrderingFilter]
+    filter_backends = [DjangoFilterBackend, KeywordOrderingFilter, NewsSearchFilter]
     filterset_class = NewsFilter
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['created_at']
