@@ -22,6 +22,9 @@ from auth.urls import urlpatterns_v1 as authv1_urls
 from settings.urls import urlpatterns_v1_cms as settingv1_cms_urls
 from settings.urls import urlpatterns_v1_public as settingv1_public_urls
 from news.urls import cms_news_v1_urls, public_news_v1_urls
+from projects.urls import urlpatterns_v1_cms as projectv1_cms_urls
+from projects.urls import urlpatterns_v1_public as projectv1_public_urls
+
 
 handler404 = "common.handler_views.error_404"
 
@@ -33,11 +36,13 @@ urlpatterns = [
                 path('users/', include(userv1_cms_urls)),
                 path('settings/', include(settingv1_cms_urls)),
                 path('news/', include(cms_news_v1_urls)),
+                path('projects/', include(projectv1_cms_urls)),
             ])),
             path('users/', include(userv1_urls)),
             path('auth/', include(authv1_urls)),
             path('settings/', include(settingv1_public_urls)),
             path('news/', include(public_news_v1_urls)),
+            path('projects/', include(projectv1_public_urls)),
         ])),
     ])),
 ]
