@@ -1,10 +1,16 @@
 from datetime import datetime
 
 import django_filters
+from rest_framework import filters
 
 from ..models import News, DetailNewsMedia
 
-
+class NewsSearchFilter(filters.BaseFilterBackend):
+    def filter_queryset(self, request, queryset, view):
+        search_param = request.query_params.get('search', None)
+        if search_param:
+            queryset = queryset.filter(title__icontains=search_param)
+        return queryset
 
 class NewsFilter(django_filters.FilterSet):
     dateField = django_filters.CharFilter(method='filter_dateField')
