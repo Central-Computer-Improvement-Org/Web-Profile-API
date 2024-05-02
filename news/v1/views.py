@@ -5,11 +5,13 @@ from django_filters import OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
 from rest_framework.exceptions import ValidationError, NotFound
+from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
 from auth.auth import IsPengurus
 from common.orderings import KeywordOrderingFilter
+from common.pagination import GenericPaginator
 from common.utils import rename_image_file
 from generic_serializers.serializers import ResponseSerializer
 from news.detail_news_media import DetailNewsMedia
@@ -26,6 +28,7 @@ class CMSNewsViewSet(viewsets.ModelViewSet):
     filterset_class = NewsFilter
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['created_at']
+    pagination_class = GenericPaginator
 
     def create(self, request, *args, **kwargs):
         super(CMSNewsViewSet, self).create(request, *args, **kwargs)
@@ -96,11 +99,13 @@ class CMSNewsViewSet(viewsets.ModelViewSet):
 
         queryset = self.filter_queryset(self.get_queryset())
 
+        page = self.paginate_queryset(queryset)
+
         serializer = ResponseSerializer({
             'code': 200,
             'status': 'success',
             'recordsTotal': queryset.count(),
-            'data': NewsSerializer(queryset, many=True).data,
+            'data': NewsSerializer(page, many=True).data,
             'error': None,
         })
 
@@ -115,6 +120,7 @@ class PublicNewsViewSet(viewsets.ModelViewSet):
     filterset_class = NewsFilter
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['created_at']
+    pagination_class = GenericPaginator
 
     def list(self, request, *args, **kwargs):
         if request.query_params.get('id'):
@@ -135,11 +141,13 @@ class PublicNewsViewSet(viewsets.ModelViewSet):
 
         queryset = self.filter_queryset(self.get_queryset())
 
+        page = self.paginate_queryset(queryset)
+
         serializer = ResponseSerializer({
             'code': 200,
             'status': 'success',
             'recordsTotal': queryset.count(),
-            'data': NewsSerializer(self.queryset, many=True).data,
+            'data': NewsSerializer(page, many=True).data,
             'error': None,
         })
 
@@ -155,6 +163,7 @@ class CMSDetailNewsMediaViewSet(viewsets.ModelViewSet):
     filterset_class = NewsMediaFilter
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['created_at']
+    pagination_class = GenericPaginator
 
     def create(self, request, *args, **kwargs):
         super(CMSDetailNewsMediaViewSet, self).create(request, *args, **kwargs)
@@ -224,11 +233,13 @@ class CMSDetailNewsMediaViewSet(viewsets.ModelViewSet):
 
         queryset = self.filter_queryset(self.get_queryset())
 
+        page = self.paginate_queryset(queryset)
+
         serializer = ResponseSerializer({
             'code': 200,
             'status': 'success',
             'recordsTotal': queryset.count(),
-            'data': DetailNewsMediaSerializer(queryset, many=True).data,
+            'data': DetailNewsMediaSerializer(page, many=True).data,
             'error': None,
         })
 
