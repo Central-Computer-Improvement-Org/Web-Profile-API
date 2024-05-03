@@ -1,0 +1,2 @@
+from .models_awards import Award
+from .models_detail_contributor_award import DetailContributorAward
