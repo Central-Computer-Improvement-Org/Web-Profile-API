@@ -5,7 +5,7 @@ from rest_framework import viewsets
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError, NotFound
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.permissions import AllowAny
 
 from auth.auth import IsPengurus
 from common.orderings import KeywordOrderingFilter
@@ -24,7 +24,7 @@ class CMSProjectViewSet(viewsets.ModelViewSet):
     contributor_queryset = DetailContributorProject.objects.all()
     project_serializer_class = ProjectSerializer
     contributor_serializer_class = DetailContributorProjectSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsPengurus]
     filterset_class = ProjectFilter
     filter_backends = [DjangoFilterBackend, KeywordOrderingFilter, ProjectSearchFilter]
     ordering_fields = ['created_at', 'updated_at']
@@ -132,7 +132,7 @@ class CMSProjectViewSet(viewsets.ModelViewSet):
                 'error': None,
             })
 
-            return Response(resp.data)
+            return Response(resp.data, status=status.HTTP_204_NO_CONTENT)
         
         except Project.DoesNotExist:
             raise NotFound('Project does not exist!')
@@ -158,7 +158,7 @@ class CMSProjectViewSet(viewsets.ModelViewSet):
                 'error': None,
             })
 
-            return Response(resp.data)
+            return Response(resp.data, status=status.HTTP_204_NO_CONTENT)
     
         except Project.DoesNotExist:
             raise NotFound('Project does not exist!')
