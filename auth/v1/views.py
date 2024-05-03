@@ -3,7 +3,7 @@ from rest_framework.exceptions import ValidationError, NotFound
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework_simplejwt.authentication import JWTAuthentication
-from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 from auth.auth import IsPengurus
@@ -52,6 +52,20 @@ class JwtObtain(TokenObtainPairView):
 
         return Response(serializer.data)
 
+class RefreshToken(TokenRefreshView):
+    permission_classes = [AllowAny]
+    def post(self, request, *args, **kwargs):
+        response = super().post(request, *args, **kwargs)
+
+        serializer = ResponseSerializer({
+            'code': 200,
+            'status': 'success',
+            'recordsTotal': 1,
+            'data': response.data,
+            'error': None,
+        })
+
+        return Response(serializer.data)
 
 class RegisterViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
