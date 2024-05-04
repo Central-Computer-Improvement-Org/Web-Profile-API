@@ -52,8 +52,6 @@ class DetailContributorProjectSerializer(serializers.ModelSerializer):
         response.pop('created_by', None)
         response.pop('updated_by', None)
         
-        
-
         return response
     
     def to_internal_value(self, data):
