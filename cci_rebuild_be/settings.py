@@ -68,8 +68,8 @@ MIDDLEWARE = [
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
-    "https://central-computer-improvement-org.github.io/Web-Profile-Backoffice",
-    "https://central-computer-improvement-org.github.io/Web-Profile-User",
+    "http://127.0.0.1:3000",
+    "https://central-computer-improvement-org.github.io",
 ]
 
 CORS_ALLOW_HEADERS = (
@@ -112,6 +112,7 @@ WSGI_APPLICATION = 'cci_rebuild_be.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
+        # 'ENGINE': 'django.db.backends.postgresql',
         'NAME': os.getenv('DATABASE_NAME'),
         'USER': os.getenv('DATABASE_USER'),
         'PASSWORD': os.getenv('DATABASE_PASSWORD'),
