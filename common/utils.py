@@ -15,6 +15,19 @@ def rename_image_file(image, prefix):
 def id_generator(prefix):
     return f'{prefix}-{timezone.now().strftime("%Y%m%d%H%M%S%f")}'
 
+
+def snake_to_camel(snake_str):
+    components = snake_str.split('_')
+    return components[0] + ''.join(x.title() for x in components[1:])
+
+def camel_to_snake(camel_str):
+    snake_chars = []
+    for i, char in enumerate(camel_str):
+        if i > 0 and char.isupper():
+            snake_chars.append('_')
+        snake_chars.append(char.lower())
+    return ''.join(snake_chars)
+
 def delete_old_file(file_path):
     if os.path.exists(file_path):
         os.remove(file_path)

@@ -137,7 +137,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Jakarta'
 
 USE_I18N = True
 
@@ -150,7 +150,6 @@ AUTH_USER_MODEL = 'users.User'
 
 STATIC_URL = 'static/'
 
-import os
 STATIC_ROOT = os.path.join(BASE_DIR, STATIC_URL)
 
 # Default primary key field type
