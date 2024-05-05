@@ -1,25 +1,21 @@
 from django.db import models
-from common.utils import rename_image_file
 
 class Setting(models.Model):
     id = models.CharField(max_length=255, primary_key=True)
 
-    name = models.CharField(max_length=255, null=True)
-    address = models.TextField(null=True)
-    telp = models.CharField(max_length=255, null=True)
-    description = models.TextField(null=True)
+    name = models.CharField(max_length=255)
+    address = models.TextField()
+    description = models.TextField(max_length=255)
+
     logo_uri = models.ImageField(upload_to='uploads/setting/')
-    title_website = models.CharField(max_length=255, null=True)
-    keyword = models.TextField(null=True)
+    title_website = models.CharField(max_length=255)
+    keyword = models.TextField()
 
     created_at = models.DateTimeField(auto_now_add=True, null=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)
 
-    def save(self, *args, **kwargs):
-        if self.logo_uri:
-            self.logo_uri = rename_image_file(self.logo_uri, prefix="STG")
-
-        super().save(*args, **kwargs)
+    created_by = models.CharField(null=True, max_length=255, default="system")
+    updated_by = models.CharField(null=True, max_length=255, default="system")
 
     def __str__(self):
         return self.name

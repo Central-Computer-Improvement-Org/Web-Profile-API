@@ -1,19 +1,19 @@
 import os
 
-from datetime import datetime
+from django.utils import timezone
 from django.core.files.base import ContentFile
 
 def rename_image_file(image, prefix):
     if image:
         new_image = ContentFile(image.read())
-        timestamp = prefix + "-" + datetime.now().strftime('%Y%m%d%H%M%S')
+        timestamp = f'{prefix}-{timezone.now().strftime("%Y%m%d%H%M%S%f")}'
         _, extension = os.path.splitext(image.name)
         new_image.name = f'{timestamp}{extension}'
         return new_image
     return image
 
 def id_generator(prefix):
-    return prefix + "-" + datetime.now().strftime('%Y%m%d%H%M%S')
+    return f'{prefix}-{timezone.now().strftime("%Y%m%d%H%M%S%f")}'
 
 
 def snake_to_camel(snake_str):
@@ -27,3 +27,7 @@ def camel_to_snake(camel_str):
             snake_chars.append('_')
         snake_chars.append(char.lower())
     return ''.join(snake_chars)
+
+def delete_old_file(file_path):
+    if os.path.exists(file_path):
+        os.remove(file_path)

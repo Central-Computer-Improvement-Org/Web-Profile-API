@@ -1,7 +1,8 @@
 import django_filters.rest_framework
-from django.core.exceptions import BadRequest
 from django.utils import timezone
-from rest_framework import viewsets
+
+from rest_framework import viewsets, status
+from rest_framework.exceptions import ValidationError, NotFound
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
@@ -9,13 +10,16 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.serializers import ListSerializer
 
 import common.orderings
+
 from generic_serializers.serializers import ResponseSerializer, GenericErrorSerializer
 from auth.auth import IsSuperUser, IsPengurus
 from . import filtersets
 
-from .serializers import UserSerializer, DivisionSerializer
-from ..models import User
-from ..models_divisions import Division
+from common.orderings import KeywordOrderingFilter
+from common.pagination import GenericPaginator
+
+from .serializers import UserSerializer, DivisionSerializer, RoleSerializer
+from ..models import User, Role, Division
 
 
 class UserProfileViewSet(viewsets.ModelViewSet):
@@ -211,6 +215,152 @@ class PublicDivisionViewSet(viewsets.ModelViewSet):
             'status': 'success',
             'recordsTotal': self.queryset.count(),
             'data': DivisionSerializer(self.queryset, many=True).data,
+            'error': None,
+        })
+
+        return Response(serializer.data)
+    
+
+class CMSRoleViewSet(viewsets.ModelViewSet):
+    serializer_class = RoleSerializer
+    permission_classes = [IsSuperUser]
+    authentication_classes = [JWTAuthentication]
+
+    queryset = Role.objects.all()
+    filterset_class = filtersets.RoleFilterSet
+    filter_backends = [django_filters.rest_framework.DjangoFilterBackend, KeywordOrderingFilter]
+    ordering_fields = ['created_at', 'updated_at']
+    ordering = ['created_at']
+    pagination_class = GenericPaginator
+
+    def list(self, request, *args, **kwargs):
+        if request.query_params.get('id'):
+            role = Role.objects.get(id=request.query_params.get('id'))
+
+            serializer = ResponseSerializer({
+                'code': 200,
+                'status': 'success',
+                'recordsTotal': 1,
+                'data': RoleSerializer(role).data,
+                'error': None,
+            })
+
+            return Response(serializer.data)
+
+        queryset = self.filter_queryset(self.get_queryset())
+
+        page = self.paginate_queryset(queryset)
+
+        serializer = ResponseSerializer({
+            'code': 200,
+            'status': 'success',
+            'recordsTotal': queryset.count(),
+            'data': RoleSerializer(page, many=True).data,
+            'error': None,
+        })
+
+        return Response(serializer.data)
+
+    def create(self, request, *args, **kwargs):
+        role = super(CMSRoleViewSet, self).create(request, *args, **kwargs)
+
+        serializer = ResponseSerializer({
+            'code': 201,
+            'status': 'success',
+            'recordsTotal': 1,
+            'data': RoleSerializer(role.data).data,
+            'error': None,
+        })
+
+        return Response(serializer.data, status=201)
+    
+    def update(self, request, *args, **kwargs):
+        id = request.query_params.get('id', None)
+
+        if id is None:
+            raise ValueError('ID is required')
+        
+        try:
+            role = Role.objects.get(id=request.query_params['id'])
+            serializers = self.get_serializer(instance=role, data=request.data, partial=True, context={'request': request})
+
+            if not serializers.is_valid():
+                raise ValidationError(serializers.errors)
+            
+            serializers.save()
+
+            resp = ResponseSerializer({
+                'code': 204,
+                'status': 'success',
+                'recordsTotal': 1,
+                'data': serializers.data,
+                'error': None,
+            })
+
+            return Response(resp.data, status=status.HTTP_204_NO_CONTENT)
+
+        except Role.DoesNotExist:
+            raise NotFound('Project does not exist!')
+
+    def destroy(self, request, *args, **kwargs):
+        id = request.query_params.get('id', None)
+
+        if id is None:
+            raise ValueError('ID is required')
+        
+        try:
+            role = Role.objects.get(id=id)
+
+            self.perform_destroy(role)
+
+            resp = ResponseSerializer({
+                'code': 204,
+                'status': 'success',
+                'recordsTotal': 0,
+                'data': None,
+                'error': None,
+            })
+
+            return Response(resp.data, status=status.HTTP_204_NO_CONTENT)
+    
+        except Role.DoesNotExist:
+            raise NotFound('Role does not exist!')
+        
+
+class PublicRoleViewSet(viewsets.ModelViewSet):
+    serializer_class = RoleSerializer
+    permission_classes = [AllowAny]
+
+    queryset = Role.objects.all()
+    filterset_class = filtersets.RoleFilterSet
+    filter_backends = [django_filters.rest_framework.DjangoFilterBackend, KeywordOrderingFilter]
+    ordering_fields = ['created_at', 'updated_at']
+    ordering = ['created_at']
+    pagination_class = GenericPaginator
+
+    def list(self, request, *args, **kwargs):
+        if request.query_params.get('id'):
+            role = Role.objects.get(id=request.query_params.get('id'))
+
+            serializer = ResponseSerializer({
+                'code': 200,
+                'status': 'success',
+                'recordsTotal': 1,
+                'data': RoleSerializer(role).data,
+                'error': None,
+            })
+
+            return Response(serializer.data)
+
+        queryset = self.filter_queryset(self.get_queryset())
+
+        page = self.paginate_queryset(queryset)
+
+        serializer = ResponseSerializer({
+            'code': 200,
+            'status': 'success',
+            'recordsTotal': queryset.count(),
+            'data': RoleSerializer(page, many=True).data,
             'error': None,
         })
 

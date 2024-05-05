@@ -1,0 +1,32 @@
+name: CCI-Web-Profile-API v.1
+
+on:
+    push:
+        branches:
+            - 'main'
+
+jobs:
+    deploy_to_server:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Deploy to Server using SSH
+              uses: appleboy/ssh-action@master
+              with:
+                  host: ${{ secrets.SSH_HOST }}
+                  port: ${{ secrets.SERVER_PORT }}
+                  username: ${{ secrets.SERVER_USERNAME }}
+                  key: ${{ secrets.SSH_PRIVATE_KEY }}
+                  script: |
+                      cd "${{ secrets.APPLICATION_PATH }}"
+                      git pull
+                      tmux kill-session -t cci-web-profile-api
+                      sudo kill $(sudo lsof -t -i:8000)
+                      source cci_web_profile/bin/activate
+                      pip install -r requirements.txt
+                      python3 manage.py migrate
+                      python3 manage.py runserver ${{ secrets.APPLICATION_HOST }}:${{ secrets.APPLICATION_PORT }} > /dev/null 2>&1 &
+            - name: Wait for server to start
+              run: sleep 10s
+
+            - name: End workflow
+              run: exit 0
