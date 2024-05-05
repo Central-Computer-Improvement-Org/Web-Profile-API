@@ -3,6 +3,7 @@ from datetime import datetime
 from django.contrib.auth.hashers import make_password
 from rest_framework import serializers
 
+from common import utils
 from ..models import User, Role
 from ..models_divisions import Division
 
@@ -154,7 +155,7 @@ class DivisionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Division
         fields = '__all__'
-        read_only_fields = ['created_at', 'updated_at', 'created_by', 'updated_by']
+        read_only_fields = ['id', 'created_at', 'updated_at', 'created_by', 'updated_by']
 
     def create(self, validated_data):
         if self.context['request'].user.is_authenticated:
@@ -163,6 +164,8 @@ class DivisionSerializer(serializers.ModelSerializer):
         else:
             validated_data['created_by'] = "system"
             validated_data['updated_by'] = "system"
+
+        validated_data['id'] = utils.id_generator("DVS")
 
         return super(DivisionSerializer, self).create(validated_data)
 

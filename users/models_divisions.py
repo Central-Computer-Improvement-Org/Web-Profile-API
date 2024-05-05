@@ -3,7 +3,7 @@ from django.utils import timezone
 
 
 class Division(models.Model):
-    id = models.CharField(primary_key=True, max_length=10)
+    id = models.CharField(primary_key=True, max_length=255)
     name = models.CharField(max_length=255)
     description = models.CharField(max_length=255)
 
