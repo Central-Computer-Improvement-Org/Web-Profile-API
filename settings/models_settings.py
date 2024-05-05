@@ -5,7 +5,6 @@ class Setting(models.Model):
 
     name = models.CharField(max_length=255)
     address = models.TextField()
-    telp = models.CharField(max_length=255)
     description = models.TextField(max_length=255)
 
     logo_uri = models.ImageField(upload_to='uploads/setting/')

@@ -175,3 +175,14 @@ class ProjectSerializer(serializers.ModelSerializer):
 
         return super(ProjectSerializer, self).update(instance, validated_data)
     
+    def delete_icon_uri(self, instance):
+        old_icon_uri = str(instance.icon_uri) if instance.icon_uri else None
+
+        old_image_uri = str(instance.image_uri) if instance.image_uri else None
+
+        if old_icon_uri:
+            delete_old_file(old_icon_uri)
+
+        if old_image_uri:
+            delete_old_file(old_image_uri)
+    
