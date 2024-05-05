@@ -3,7 +3,8 @@ from rest_framework import serializers
 from ..models import Setting, Contact
 
 from common.utils import rename_image_file, delete_old_file, id_generator
-from django.utils import timezone
+
+import copy
 
 class SettingSerializer(serializers.ModelSerializer): 
     class Meta: 
@@ -12,7 +13,6 @@ class SettingSerializer(serializers.ModelSerializer):
             'id',
             'name',
             'address',
-            'telp',
             'description',
             'logo_uri',
             'title_website',
@@ -34,7 +34,6 @@ class SettingSerializer(serializers.ModelSerializer):
         required_fields = [
             'name',
             'address',
-            'telp',
             'description',
             'logo_uri',
             'title_website',
@@ -54,7 +53,7 @@ class SettingSerializer(serializers.ModelSerializer):
             if old_logo_uri and old_logo_uri != "uploads/setting/default.png":
                 delete_old_file(old_logo_uri)
 
-        return super().update(instance, validated_data)
+        return super(SettingSerializer, self).update(instance, validated_data)
 
 
     def to_representation(self, instance):
@@ -64,7 +63,6 @@ class SettingSerializer(serializers.ModelSerializer):
         response['id'] = response.pop('id')
         response['name'] = response.pop('name')
         response['address'] = response.pop('address')
-        response['telp'] = response.pop('telp')
         response['description'] = response.pop('description')
         response['logoUri'] = response.pop('logo_uri')
         response['titleWebsite'] = response.pop('title_website')
@@ -77,17 +75,16 @@ class SettingSerializer(serializers.ModelSerializer):
         return response
 
     def to_internal_value(self, data):
-        data['name'] = data.get('name', self.instance.name if self.instance else None)
-        data['address'] = data.get('address', self.instance.address if self.instance else None)
-        data['telp'] = data.get('telp', self.instance.telp if self.instance else None)
-        data['description'] = data.get('description', self.instance.description if self.instance else None)
-        data['title_website'] = data.get('titleWebsite', self.instance.title_website if self.instance else None)
-        data['keyword'] = data.get('keyword', self.instance.keyword if self.instance else None)
+        new_data = copy.deepcopy(data)
+
+        if 'titleWebsite' in data:
+            new_data['title_website'] = data.get('titleWebsite', None)
 
         if 'logoUri' in data :
-            data['logo_uri'] = data.get('logoUri')
+            new_data['logo_uri'] = data.get('logoUri')
+            new_data['logo_uri'] = rename_image_file(new_data['logo_uri'], prefix="STG")
 
-        return super().to_internal_value(data)
+        return super().to_internal_value(new_data)
     
 
 class ContactSerializer(serializers.ModelSerializer):

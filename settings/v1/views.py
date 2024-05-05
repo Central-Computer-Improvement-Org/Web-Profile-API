@@ -1,15 +1,17 @@
-from django.utils import timezone
-
-from rest_framework import viewsets
-from rest_framework.response import Response
-from rest_framework.exceptions import ValidationError, NotFound
-from rest_framework.permissions import IsAuthenticated, AllowAny
 from django_filters.rest_framework import DjangoFilterBackend
 
-from auth.auth import IsPengurus
-from common.orderings import KeywordOrderingFilter
+from rest_framework import viewsets, status
+from rest_framework.response import Response
+from rest_framework.exceptions import ValidationError, NotFound
+from rest_framework.permissions import AllowAny
 
-from generic_serializers.serializers import ResponseSerializer, GenericErrorSerializer
+from settings.v1.filtersets import ContactFilter, ContactSearchFilter
+
+from auth.auth import IsSuperUser
+from common.orderings import KeywordOrderingFilter
+from common.pagination import GenericPaginator
+
+from generic_serializers.serializers import ResponseSerializer
 
 from .serializers import SettingSerializer, ContactSerializer
 from ..models import Setting, Contact
@@ -19,7 +21,7 @@ from copy import deepcopy
 
 class CMSSettingViewSet(viewsets.ModelViewSet):
     serializer_class = SettingSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsSuperUser]
     
     def update(self, request, *args, **kwargs):
         setting = Setting.objects.first()
@@ -27,14 +29,12 @@ class CMSSettingViewSet(viewsets.ModelViewSet):
         if not setting:
             raise NotFound('Setting does not exist!')
 
-        data = request.data.copy()
-
-        serializer = self.get_serializer(setting, data=data, partial=True)
+        serializer = self.get_serializer(instance=setting, data=request.data, partial=True, context={'request': request})
 
         if not serializer.is_valid():
             raise ValidationError(serializer.errors)
 
-        self.perform_update(serializer)
+        serializer.save()
 
         resp = ResponseSerializer({
             'code': 200,
@@ -44,7 +44,7 @@ class CMSSettingViewSet(viewsets.ModelViewSet):
             'error': None,
         })
 
-        return Response(resp.data)
+        return Response(resp.data, status=status.HTTP_204_NO_CONTENT)
     
     def retrieve(self, request, *args, **kwargs):
         setting = Setting.objects.first()
@@ -101,11 +101,12 @@ class PublicSettingViewSet(viewsets.ModelViewSet):
 class CMSContactViewSet(viewsets.ModelViewSet):
     queryset = Contact.objects.all()
     serializer_class = ContactSerializer
-    permission_classes = [IsAuthenticated]
-    filterset_fields = ['platform', 'created_at', 'updated_at']
-    filter_backends = [DjangoFilterBackend, KeywordOrderingFilter]
+    permission_classes = [IsSuperUser]
+    filterset_class = ContactFilter
+    filter_backends = [DjangoFilterBackend, KeywordOrderingFilter, ContactSearchFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['created_at']
+    pagination_class = GenericPaginator
 
     def list(self, request, *args, **kwargs):
         if request.query_params.get('id'):
@@ -123,11 +124,13 @@ class CMSContactViewSet(viewsets.ModelViewSet):
 
         queryset = self.filter_queryset(self.get_queryset())
 
+        page = self.paginate_queryset(queryset)
+
         serializer = ResponseSerializer({
             'code': 200,
             'status': 'success',
             'recordsTotal': queryset.count(),
-            'data': ContactSerializer(queryset, many=True).data,
+            'data': ContactSerializer(page, many=True).data,
             'error': None,
         })
 
@@ -177,7 +180,7 @@ class CMSContactViewSet(viewsets.ModelViewSet):
                 'error': None,
             })
 
-            return Response(resp.data)
+            return Response(resp.data, status=status.HTTP_204_NO_CONTENT)
         
         except Contact.DoesNotExist:
             raise NotFound('Contact does not exist!')
@@ -203,14 +206,20 @@ class CMSContactViewSet(viewsets.ModelViewSet):
                 'error': None,
             })
 
-            return Response(resp.data)
+            return Response(resp.data, status=status.HTTP_204_NO_CONTENT)
     
         except Contact.DoesNotExist:
             raise NotFound('Contact does not exist!')
     
 class PublicContactViewSet(viewsets.ModelViewSet):
+    queryset = Contact.objects.all()
     serializer_class = ContactSerializer
     permission_classes = [AllowAny]
+    filterset_class = ContactFilter
+    filter_backends = [DjangoFilterBackend, KeywordOrderingFilter, ContactSearchFilter]
+    ordering_fields = ['created_at', 'updated_at']
+    ordering = ['created_at']
+    pagination_class = GenericPaginator
 
     def list(self, request, *args, **kwargs):
         if request.query_params.get('id'):
@@ -226,13 +235,15 @@ class PublicContactViewSet(viewsets.ModelViewSet):
 
             return Response(serializer.data)
 
-        contacts = Contact.objects.all()
+        queryset = self.filter_queryset(self.get_queryset())
+
+        page = self.paginate_queryset(queryset)
 
         serializer = ResponseSerializer({
             'code': 200,
             'status': 'success',
-            'recordsTotal': contacts.count(),
-            'data': ContactSerializer(contacts, many=True).data,
+            'recordsTotal': queryset.count(),
+            'data': ContactSerializer(page, many=True).data,
             'error': None,
         })
 

@@ -1,16 +1,13 @@
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db import transaction
 
-from rest_framework import viewsets
-from rest_framework import status
+from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError, NotFound
 from rest_framework.permissions import AllowAny
 
 from auth.auth import IsPengurus
 from common.orderings import KeywordOrderingFilter
-from common.utils import id_generator
-from copy import copy
 
 from projects.v1.filtersets import ProjectFilter, ProjectSearchFilter
 
@@ -93,7 +90,7 @@ class CMSProjectViewSet(viewsets.ModelViewSet):
             'error': None,
         })
 
-        return Response(resp.data)
+        return Response(resp.data, status=status.HTTP_201_CREATED)
     
     def update(self, request, *args, **kwargs):
         id = request.query_params.get('id', None)
@@ -145,6 +142,10 @@ class CMSProjectViewSet(viewsets.ModelViewSet):
         
         try:
             project = Project.objects.get(id=id)
+
+            serializer = ProjectSerializer(project)
+
+            serializer.delete_icon_uri(project)
 
             DetailContributorProject.objects.filter(project_id=id).delete()
 
