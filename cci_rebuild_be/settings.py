@@ -17,6 +17,10 @@ import os
 
 load_dotenv()
 
+SSL_CERTIFICATE = '/etc/letsencrypt/live/103-31-38-146.sslip.io/fullchain.pem'
+SSL_PRIVATE_KEY = '/etc/letsencrypt/live/103-31-38-146.sslip.io/privkey.pem'
+SECURE_SSL_REDIRECT = '/'
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
