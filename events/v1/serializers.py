@@ -65,3 +65,9 @@ class EventSerializer(serializers.ModelSerializer):
         validated_data['updated_by'] = self.context['request'].user.nim
 
         return super(EventSerializer, self).update(instance, validated_data)
+
+    def delete(self, instance):
+        instance.is_published = False
+        instance.save()
+
+        return instance
