@@ -152,6 +152,7 @@ def global_exception_handler(exc, context):
         'Http404': not_found_exception_handler,
         'DoesNotExist': not_found_exception_handler,
         'MethodNotAllowed': method_not_allowed_exception_handler,
+        'TypeError': server_error_exception_handler,
     }
 
     response = err_map.get(exc.__class__.__name__, server_error_exception_handler)(request, exc)

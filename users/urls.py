@@ -8,6 +8,7 @@ urlpatterns_v1_cms = [
     path('', UserViewSet.as_view({
         'get': 'list',
         'patch': 'update',
+        'delete': 'destroy',
     }), name='users'),
     path('roles/', CMSRoleViewSet.as_view({
         'get': 'list',

@@ -57,7 +57,8 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     permission_classes = [IsPengurus]
     authentication_classes = [JWTAuthentication]
-    filter_backends = [filtersets.UserSearchFilter, django_filters.rest_framework.DjangoFilterBackend, common.orderings.KeywordOrderingFilter]
+    filter_backends = [filtersets.UserSearchFilter, django_filters.rest_framework.DjangoFilterBackend,
+                       common.orderings.KeywordOrderingFilter]
     filterset_class = filtersets.UserFilterSet
     ordering_fields = ['createdAt', 'updatedAt']
     ordering = ['created_at']
@@ -111,6 +112,26 @@ class UserViewSet(viewsets.ModelViewSet):
             return Response(response.data)
         else:
             raise ValidationError(serializer.errors)
+
+    def destroy(self, request, *args, **kwargs):
+        if request.query_params.get('nim') is None:
+            raise ValueError('NIM is required')
+
+        user = User.objects.get(nim=request.query_params['nim'])
+
+        serializer = UserSerializer(user)
+
+        serializer.delete(user)
+
+        serializer = ResponseSerializer({
+            'code': 200,
+            'status': 'success',
+            'recordsTotal': 1,
+            'data': None,
+            'error': None,
+        })
+
+        return Response(serializer.data)
 
 
 class CMSDivisionViewSet(viewsets.ModelViewSet):
@@ -219,7 +240,7 @@ class PublicDivisionViewSet(viewsets.ModelViewSet):
         })
 
         return Response(serializer.data)
-    
+
 
 class CMSRoleViewSet(viewsets.ModelViewSet):
     serializer_class = RoleSerializer
@@ -273,20 +294,21 @@ class CMSRoleViewSet(viewsets.ModelViewSet):
         })
 
         return Response(serializer.data, status=201)
-    
+
     def update(self, request, *args, **kwargs):
         id = request.query_params.get('id', None)
 
         if id is None:
             raise ValueError('ID is required')
-        
+
         try:
             role = Role.objects.get(id=request.query_params['id'])
-            serializers = self.get_serializer(instance=role, data=request.data, partial=True, context={'request': request})
+            serializers = self.get_serializer(instance=role, data=request.data, partial=True,
+                                              context={'request': request})
 
             if not serializers.is_valid():
                 raise ValidationError(serializers.errors)
-            
+
             serializers.save()
 
             resp = ResponseSerializer({
@@ -307,7 +329,7 @@ class CMSRoleViewSet(viewsets.ModelViewSet):
 
         if id is None:
             raise ValueError('ID is required')
-        
+
         try:
             role = Role.objects.get(id=id)
 
@@ -322,10 +344,10 @@ class CMSRoleViewSet(viewsets.ModelViewSet):
             })
 
             return Response(resp.data, status=status.HTTP_204_NO_CONTENT)
-    
+
         except Role.DoesNotExist:
             raise NotFound('Role does not exist!')
-        
+
 
 class PublicRoleViewSet(viewsets.ModelViewSet):
     serializer_class = RoleSerializer

@@ -1,0 +1,26 @@
+[
+    {
+        "model": "users.division",
+        "fields": {
+            "id": "DV-WEB",
+            "name": "Web Dev",
+            "description": "Web Development Division"
+        }
+    },
+    {
+        "model": "users.division",
+        "fields": {
+            "id": "DV-DSG",
+            "name": "Design",
+            "description": "Design Division"
+        }
+    },
+    {
+        "model": "users.division",
+        "fields": {
+            "id": "DV-DS",
+            "name": "Data Science",
+            "description": "Data Science Division"
+        }
+    }
+]
