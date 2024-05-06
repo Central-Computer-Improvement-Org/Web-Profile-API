@@ -7,8 +7,8 @@ from users.models_divisions import Division
 
 class Event(models.Model):
     id = models.CharField(max_length=255, primary_key=True)
-    name = models.CharField(max_length=255)
-    description = models.TextField()
+    name = models.CharField(max_length=15)
+    description = models.CharField(max_length=130)
     division_id = models.ForeignKey(Division, on_delete=models.CASCADE)
     media_uri = models.ImageField(upload_to="uploads/events/thumbnails/")
     held_on = models.DateField()
