@@ -19,7 +19,7 @@ load_dotenv()
 
 SSL_CERTIFICATE = '/etc/letsencrypt/live/103-31-38-146.sslip.io/fullchain.pem'
 SSL_PRIVATE_KEY = '/etc/letsencrypt/live/103-31-38-146.sslip.io/privkey.pem'
-SECURE_SSL_REDIRECT = TRUE
+SECURE_SSL_REDIRECT = True
 # SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
