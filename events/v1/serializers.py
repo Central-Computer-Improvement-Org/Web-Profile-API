@@ -24,7 +24,7 @@ class EventSerializer(serializers.ModelSerializer):
             'description',
             'start_date',
             'end_date',
-            'is_published',
+            'is_active',
         ]
 
     def to_representation(self, instance):
@@ -38,15 +38,17 @@ class EventSerializer(serializers.ModelSerializer):
         response['updatedAt'] = response.pop('updated_at', None)
         response['createdBy'] = response.pop('created_by', None)
         response['updatedBy'] = response.pop('updated_by', None)
-        response['isPublished'] = response.pop('is_published', None)
+        response['isActive'] = response.pop('is_active', None)
+        response['mediaUri'] = response.pop('media_uri', None)
+        response['heldOn'] = response.pop('held_on', None)
 
         return response
 
     def to_internal_value(self, data):
         new_data = data.copy()
 
-        if 'isPublished' in data:
-            new_data['is_published'] = data.get('isPublished', None)
+        if 'isActive' in data:
+            new_data['is_active'] = data.get('isActive', None)
 
         if 'startDate' in data:
             new_data['start_date'] = data.get('startDate', None)
@@ -56,6 +58,12 @@ class EventSerializer(serializers.ModelSerializer):
 
         if 'divisionId' in data:
             new_data['division_id'] = data.get('divisionId', None)
+
+        if 'heldOn' in data:
+            new_data['held_on'] = data.get('heldOn', None)
+
+        if 'mediaUri' in data:
+            new_data['media_uri'] = data.get('mediaUri', None)
 
         return super().to_internal_value(new_data)
 
