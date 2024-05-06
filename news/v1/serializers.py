@@ -117,7 +117,7 @@ class DetailNewsMediaSerializer(serializers.ModelSerializer):
 
         if 'mediaUri' in data:
             new_data['media_uri'] = data.get('mediaUri', None)
-            new_data['media_uri'] = rename_image_file(new_data['media_uri'], prefix="STG")
+            new_data['media_uri'] = rename_image_file(new_data['media_uri'], prefix="DNM")
 
         if 'newsId' in data:
             new_data['news_id'] = data.get('newsId', None)
@@ -144,7 +144,7 @@ class DetailNewsMediaSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         if 'media_uri' in validated_data:
-            validated_data['media_uri'] = rename_image_file(validated_data['media_uri'], prefix="STG")
+            validated_data['media_uri'] = rename_image_file(validated_data['media_uri'], prefix="DNM")
 
         validated_data['updated_at'] = timezone.now()
         validated_data['updated_by'] = self.context['request'].user.nim

@@ -23,8 +23,7 @@ from ..models import User, Role, Division
 
 
 class UserProfileViewSet(viewsets.ModelViewSet):
-    permission_classes = [IsAuthenticated]
-    authentication_classes = [JWTAuthentication]
+    permission_classes = [AllowAny]
 
     def retrieve(self, request, *args, **kwargs):
         profile = User.objects.get(nim=request.user.nim)
