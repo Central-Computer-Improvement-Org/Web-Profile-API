@@ -1,0 +1,21 @@
+[{
+        "model": "users.user",
+        "fields": {
+            "nim": "607062330006",
+            "role_id": "SPR",
+            "division_id": "DV-WEB",
+            "name": "Rahman",
+            "email": "rahman@example.com",
+            "password": "pbkdf2_sha256$720000$FvHhW7Tz2qJ1APSyXGKtua$r+xTWKEYIjGISTtaUDV1STRv6DOZuOaVLwxmPr5SqPQ=",
+            "major": "D3 RPLA",
+            "linkedin_uri": "https://linkedin.com/",
+            "phone_number": "089655603027",
+            "profile_uri": "uploads/user/profile/bernk.png",
+            "year_university_enrolled": "2020-01-01",
+            "year_community_enrolled": "2020-01-01",
+            "created_at": "2022-01-02T00:00:00Z",
+            "updated_at": "2022-01-02T00:00:00Z",
+            "created_by": "Seeder",
+            "updated_by": "Seeder"
+        }
+}]

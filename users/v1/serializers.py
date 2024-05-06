@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from django.contrib.auth.hashers import make_password
+from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import serializers
 
 from common import utils
@@ -12,7 +13,94 @@ import copy
 from common.utils import id_generator
 
 
+class RoleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Role
+        fields = '__all__'
+
+        required_fields = [
+            'id',
+            'name',
+        ]
+
+        read_only_fields = [
+            'created_at',
+            'updated_at',
+            'created_by',
+            'updated_by'
+        ]
+
+    def create(self, validated_data):
+        if self.context['request'].user.is_authenticated:
+            validated_data['created_by'] = self.context['request'].user.nim
+            validated_data['updated_by'] = self.context['request'].user.nim
+        else:
+            validated_data['created_by'] = "system"
+            validated_data['updated_by'] = "system"
+
+        return super(RoleSerializer, self).create(validated_data)
+
+    def update(self, instance, validated_data):
+        validated_data['updated_at'] = datetime.now()
+        validated_data['updated_by'] = self.context['request'].user.nim
+
+        return super(RoleSerializer, self).update(instance, validated_data)
+
+    def to_representation(self, instance):
+        response = super().to_representation(instance)
+
+        response['createdAt'] = response.pop('created_at', None)
+        response['updatedAt'] = response.pop('updated_at', None)
+        response['createdBy'] = response.pop('created_by', None)
+        response['updatedBy'] = response.pop('updated_by', None)
+        response['id'] = response.pop('id', None)
+        response['name'] = response.pop('name', None)
+
+        return response
+
+
+class DivisionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Division
+        fields = '__all__'
+        read_only_fields = ['id', 'created_at', 'updated_at', 'created_by', 'updated_by']
+
+    def create(self, validated_data):
+        if self.context['request'].user.is_authenticated:
+            validated_data['created_by'] = self.context['request'].user.nim
+            validated_data['updated_by'] = self.context['request'].user.nim
+        else:
+            validated_data['created_by'] = "system"
+            validated_data['updated_by'] = "system"
+
+        validated_data['id'] = utils.id_generator("DVS")
+
+        return super(DivisionSerializer, self).create(validated_data)
+
+    def update(self, instance, validated_data):
+        validated_data['updated_at'] = datetime.now()
+        validated_data['updated_by'] = self.context['request'].user.nim
+
+        return super(DivisionSerializer, self).update(instance, validated_data)
+
+    def to_representation(self, instance):
+        response = super().to_representation(instance)
+
+        response['createdAt'] = response.pop('created_at', None)
+        response['updatedAt'] = response.pop('updated_at', None)
+        response['createdBy'] = response.pop('created_by', None)
+        response['updatedBy'] = response.pop('updated_by', None)
+        response['id'] = response.pop('id', None)
+        response['name'] = response.pop('name', None)
+        response['description'] = response.pop('description', None)
+
+        return response
+
+
+
 class UserSerializer(serializers.ModelSerializer):
+    role = RoleSerializer(source="role_id", read_only=True)
+    division = DivisionSerializer(source="division_id", read_only=True)
     class Meta:
         model = User
         fields = [
@@ -22,6 +110,8 @@ class UserSerializer(serializers.ModelSerializer):
             'password',
             'role_id',
             'division_id',
+            'role',
+            'division',
             'major',
             'linkedin_uri',
             'phone_number',
@@ -31,7 +121,8 @@ class UserSerializer(serializers.ModelSerializer):
             'created_at',
             'updated_at',
             'created_by',
-            'updated_by'
+            'updated_by',
+            'active'
         ]
 
         extra_kwargs = {
@@ -56,7 +147,7 @@ class UserSerializer(serializers.ModelSerializer):
             'created_at',
             'updated_at',
             'created_by',
-            'updated_by'
+            'updated_by',
         ]
 
     def get_fields(self):
@@ -86,6 +177,8 @@ class UserSerializer(serializers.ModelSerializer):
             new_data['year_community_enrolled'] = data.get('yearCommunityEnrolled', None)
         if 'linkedinUri' in data:
             new_data['linkedin_uri'] = data.get('linkedinUri', None)
+        if 'isActive' in data:
+            new_data['active'] = data.get('isActive', None)
 
         if 'year_university_enrolled' in new_data:
             new_data['year_university_enrolled'] = datetime.strptime(new_data['year_university_enrolled'], '%d-%m-%Y').date()
@@ -112,11 +205,14 @@ class UserSerializer(serializers.ModelSerializer):
 
         response['roleId'] = response.pop('role_id', None)
         response['divisionId'] = response.pop('division_id', None)
+        response['role'] = response.pop('role', None)
+        response['division'] = response.pop('division', None)
         response['linkedinUri'] = response.pop('linkedin_uri', None)
         response['phoneNumber'] = response.pop('phone_number', None)
         response['profileUri'] = response.pop('profile_uri', None)
         response['yearUniversityEnrolled'] = response.pop('year_university_enrolled', None)
         response['yearCommunityEnrolled'] = response.pop('year_community_enrolled', None)
+        response['isActive'] = response.pop('active', None)
         response['createdAt'] = response.pop('created_at', None)
         response['updatedAt'] = response.pop('updated_at', None)
         response['createdBy'] = response.pop('created_by', None)
@@ -129,6 +225,18 @@ class UserSerializer(serializers.ModelSerializer):
         validated_data['updated_by'] = self.context['request'].user.nim
 
         return super(UserSerializer, self).update(instance, validated_data)
+
+    def delete(self, instance):
+        instance.active = False
+        instance.save()
+
+        return instance
+
+    def get_role(self, obj):
+        return obj.role_id
+
+    def get_division(self, obj):
+        return obj.division_id
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
@@ -145,63 +253,3 @@ class UserProfileSerializer(serializers.ModelSerializer):
         response['profileUri'] = response.pop('profile_uri')
 
         return response
-
-
-class RoleSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Role
-        fields = '__all__'
-
-        required_fields = [
-            'id',
-            'name',
-        ]
-
-        read_only_fields = [
-            'created_at',
-            'updated_at',
-            'created_by',
-            'updated_by'
-        ]
-
-    def create(self, validated_data):        
-        if self.context['request'].user.is_authenticated:
-            validated_data['created_by'] = self.context['request'].user.nim
-            validated_data['updated_by'] = self.context['request'].user.nim
-        else:
-            validated_data['created_by'] = "system"
-            validated_data['updated_by'] = "system"
-
-        return super(RoleSerializer, self).create(validated_data)
-    
-    def update(self, instance, validated_data):
-        validated_data['updated_at'] = datetime.now()
-        validated_data['updated_by'] = self.context['request'].user.nim
-
-        return super(RoleSerializer, self).update(instance, validated_data)
-
-
-class DivisionSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Division
-        fields = '__all__'
-        read_only_fields = ['id', 'created_at', 'updated_at', 'created_by', 'updated_by']
-
-    def create(self, validated_data):
-        if self.context['request'].user.is_authenticated:
-            validated_data['created_by'] = self.context['request'].user.nim
-            validated_data['updated_by'] = self.context['request'].user.nim
-        else:
-            validated_data['created_by'] = "system"
-            validated_data['updated_by'] = "system"
-
-        validated_data['id'] = utils.id_generator("DVS")
-
-        return super(DivisionSerializer, self).create(validated_data)
-
-
-    def update(self, instance, validated_data):
-        validated_data['updated_at'] = datetime.now()
-        validated_data['updated_by'] = self.context['request'].user.nim
-
-        return super(DivisionSerializer, self).update(instance, validated_data)
