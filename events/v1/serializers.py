@@ -2,9 +2,11 @@ from django.utils import timezone
 from rest_framework import serializers
 
 from events.models import Event
+from users.v1.serializers import DivisionSerializer
 
 
 class EventSerializer(serializers.ModelSerializer):
+    division = DivisionSerializer(source="division_id", read_only=True)
     class Meta:
         model = Event
         fields = '__all__'
@@ -30,6 +32,8 @@ class EventSerializer(serializers.ModelSerializer):
 
         response['startDate'] = response.pop('start_date', None)
         response['endDate'] = response.pop('end_date', None)
+        response['divisionId'] = response.pop('division_id', None)
+        response['division'] = response.pop('division', None)
         response['createdAt'] = response.pop('created_at', None)
         response['updatedAt'] = response.pop('updated_at', None)
         response['createdBy'] = response.pop('created_by', None)
@@ -49,6 +53,9 @@ class EventSerializer(serializers.ModelSerializer):
 
         if 'endDate' in data:
             new_data['end_date'] = data.get('endDate', None)
+
+        if 'divisionId' in data:
+            new_data['division_id'] = data.get('divisionId', None)
 
         return super().to_internal_value(new_data)
 
