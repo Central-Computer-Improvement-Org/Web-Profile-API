@@ -260,9 +260,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
         response['profileUri'] = response.pop('profile_uri')
 
         return response
-<<<<<<< HEAD
-
-
+    
 class RoleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Role
@@ -323,5 +321,3 @@ class DivisionSerializer(serializers.ModelSerializer):
         validated_data['updated_by'] = self.context['request'].user.nim
 
         return super(DivisionSerializer, self).update(instance, validated_data)
-=======
->>>>>>> 4ec50ca69b7869bc0cbff84951f987f016c39d72

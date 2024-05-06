@@ -103,8 +103,8 @@ WSGI_APPLICATION = 'cci_rebuild_be.wsgi.application'
 # use postgres
 DATABASES = {
     'default': {
-        # 'ENGINE': 'django.db.backends.mysql',
-        'ENGINE': 'django.db.backends.postgresql',
+        'ENGINE': 'django.db.backends.mysql',
+        # 'ENGINE': 'django.db.backends.postgresql',
         'NAME': os.getenv('DATABASE_NAME'),
         'USER': os.getenv('DATABASE_USER'),
         'PASSWORD': os.getenv('DATABASE_PASSWORD'),
@@ -148,18 +148,22 @@ AUTH_USER_MODEL = 'users.User'
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_URL = 'static/'
-STATIC_ROOT = os.path.join(BASE_DIR, STATIC_URL)
 
+STATIC_URL = '/static/'
 MEDIA_URL = '/media/'
+
+APPEND_SLASH=False
+
 MEDIA_ROOT= os.path.join(BASE_DIR, 'media')
+
+import os
+STATIC_ROOT = os.path.join(BASE_DIR, STATIC_URL)
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-APPEND_SLASH = False
 
 # Rest Framework settings
 
