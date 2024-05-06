@@ -2,9 +2,11 @@ from django.utils import timezone
 from rest_framework import serializers
 
 from events.models import Event
+from users.v1.serializers import DivisionSerializer
 
 
 class EventSerializer(serializers.ModelSerializer):
+    division = DivisionSerializer(source="division_id", read_only=True)
     class Meta:
         model = Event
         fields = '__all__'
@@ -22,7 +24,7 @@ class EventSerializer(serializers.ModelSerializer):
             'description',
             'start_date',
             'end_date',
-            'is_published',
+            'is_active',
         ]
 
     def to_representation(self, instance):
@@ -30,25 +32,38 @@ class EventSerializer(serializers.ModelSerializer):
 
         response['startDate'] = response.pop('start_date', None)
         response['endDate'] = response.pop('end_date', None)
+        response['divisionId'] = response.pop('division_id', None)
+        response['division'] = response.pop('division', None)
         response['createdAt'] = response.pop('created_at', None)
         response['updatedAt'] = response.pop('updated_at', None)
         response['createdBy'] = response.pop('created_by', None)
         response['updatedBy'] = response.pop('updated_by', None)
-        response['isPublished'] = response.pop('is_published', None)
+        response['isActive'] = response.pop('is_active', None)
+        response['mediaUri'] = response.pop('media_uri', None)
+        response['heldOn'] = response.pop('held_on', None)
 
         return response
 
     def to_internal_value(self, data):
         new_data = data.copy()
 
-        if 'isPublished' in data:
-            new_data['is_published'] = data.get('isPublished', None)
+        if 'isActive' in data:
+            new_data['is_active'] = data.get('isActive', None)
 
         if 'startDate' in data:
             new_data['start_date'] = data.get('startDate', None)
 
         if 'endDate' in data:
             new_data['end_date'] = data.get('endDate', None)
+
+        if 'divisionId' in data:
+            new_data['division_id'] = data.get('divisionId', None)
+
+        if 'heldOn' in data:
+            new_data['held_on'] = data.get('heldOn', None)
+
+        if 'mediaUri' in data:
+            new_data['media_uri'] = data.get('mediaUri', None)
 
         return super().to_internal_value(new_data)
 
@@ -65,3 +80,9 @@ class EventSerializer(serializers.ModelSerializer):
         validated_data['updated_by'] = self.context['request'].user.nim
 
         return super(EventSerializer, self).update(instance, validated_data)
+
+    def delete(self, instance):
+        instance.is_published = False
+        instance.save()
+
+        return instance

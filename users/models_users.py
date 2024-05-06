@@ -21,7 +21,7 @@ class User(AbstractBaseUser):
     year_university_enrolled = models.DateField(null=True)
     year_community_enrolled = models.DateField(null=True)
 
-    is_active = models.BooleanField(default=True)
+    active = models.BooleanField(default=True)
 
     created_at = models.DateTimeField(auto_now_add=True, null=True)
     updated_at = models.DateTimeField(auto_now_add=True, null=True)
@@ -44,7 +44,7 @@ class User(AbstractBaseUser):
         return self.role_id.name == "Member" or self.role_id.name == "Pengurus" or self.role_id.name == "Superadmin"
 
     def is_active(self):
-        return self.is_active
+        return self.active
 
     def __str__(self):
         return self.email
