@@ -2,6 +2,7 @@ import django_filters
 from django.shortcuts import render
 from rest_framework import viewsets
 from rest_framework.exceptions import ValidationError
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
 from auth.auth import IsPengurus
@@ -100,5 +101,37 @@ class CMSEventViewSet(viewsets.ModelViewSet):
 
         return Response(serializer.data)
 
+
 class PublicEventViewSet(viewsets.ModelViewSet):
     queryset = Event.objects.filter(is_active=True)
+    serializer_class = EventSerializer
+    permission_classes = [AllowAny]
+    filter_backends = [filtersets.EventSearchFilter, django_filters.rest_framework.DjangoFilterBackend]
+    filterset_class = filtersets.EventFilterSet
+
+    def list(self, request, *args, **kwargs):
+        if request.query_params.get('id'):
+            event = Event.objects.get(id=request.query_params.get('id'))
+
+            serializer = ResponseSerializer({
+                'code': 200,
+                'status': 'success',
+                'recordsTotal': 1,
+                'data': EventSerializer(event).data,
+                'error': None,
+            })
+
+            return Response(serializer.data)
+
+        events = self.filter_queryset(self.get_queryset())
+
+        serializer = ResponseSerializer({
+            'code': 200,
+            'status': 'success',
+            'recordsTotal': events.count(),
+            'data': EventSerializer(events, many=True).data,
+            'error': None,
+        })
+
+        return Response(serializer.data)
+
