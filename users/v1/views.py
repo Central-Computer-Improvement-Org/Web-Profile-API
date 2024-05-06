@@ -9,6 +9,7 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.serializers import ListSerializer
 
+import common.orderings
 
 from generic_serializers.serializers import ResponseSerializer, GenericErrorSerializer
 from auth.auth import IsSuperUser, IsPengurus
@@ -56,8 +57,10 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     permission_classes = [IsPengurus]
     authentication_classes = [JWTAuthentication]
-    filter_backends = [filtersets.UserSearchFilter, django_filters.rest_framework.DjangoFilterBackend]
+    filter_backends = [filtersets.UserSearchFilter, django_filters.rest_framework.DjangoFilterBackend, common.orderings.KeywordOrderingFilter]
     filterset_class = filtersets.UserFilterSet
+    ordering_fields = ['createdAt', 'updatedAt']
+    ordering = ['created_at']
 
     def list(self, request, *args, **kwargs):
         if request.query_params.get('nim'):
@@ -111,9 +114,13 @@ class UserViewSet(viewsets.ModelViewSet):
 
 
 class CMSDivisionViewSet(viewsets.ModelViewSet):
+    queryset = Division.objects.all()
     serializer_class = DivisionSerializer
     permission_classes = [IsPengurus]
     authentication_classes = [JWTAuthentication]
+    filter_backends = [django_filters.rest_framework.DjangoFilterBackend, common.orderings.KeywordOrderingFilter]
+    ordering_fields = ['name', 'description', 'createdAt', 'updatedAt']
+    ordering = ['name']
 
     def list(self, request, *args, **kwargs):
         if request.query_params.get('id'):
@@ -129,13 +136,13 @@ class CMSDivisionViewSet(viewsets.ModelViewSet):
 
             return Response(serializer.data)
 
-        divisions = Division.objects.all()
+        queryset = self.filter_queryset(self.get_queryset())
 
         serializer = ResponseSerializer({
             'code': 200,
             'status': 'success',
-            'recordsTotal': divisions.count(),
-            'data': DivisionSerializer(divisions, many=True).data,
+            'recordsTotal': queryset.count(),
+            'data': DivisionSerializer(queryset, many=True).data,
             'error': None,
         })
 
