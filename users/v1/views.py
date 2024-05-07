@@ -23,7 +23,8 @@ from ..models import User, Role, Division
 
 
 class UserProfileViewSet(viewsets.ModelViewSet):
-    permission_classes = [AllowAny]
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
 
     def retrieve(self, request, *args, **kwargs):
         profile = User.objects.get(nim=request.user.nim)
@@ -48,6 +49,41 @@ class UserProfileViewSet(viewsets.ModelViewSet):
                     'validation': None,
                 }).data
             })
+
+        return Response(serializer.data)
+
+class PublicUserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    permission_classes = [AllowAny]
+    filter_backends = [filtersets.UserSearchFilter, django_filters.rest_framework.DjangoFilterBackend,
+                       common.orderings.KeywordOrderingFilter]
+    filterset_class = filtersets.UserFilterSet
+    ordering_fields = ['createdAt', 'updatedAt']
+    ordering = ['created_at']
+
+    def list(self, request, *args, **kwargs):
+        if request.query_params.get('nim'):
+            user = User.objects.get(nim=request.query_params.get('nim'))
+
+            serializer = ResponseSerializer({
+                'code': 200,
+                'status': 'success',
+                'recordsTotal': 1,
+                'data': UserSerializer(user).data,
+                'error': None,
+            })
+
+            return Response(serializer.data)
+
+        queryset = self.filter_queryset(self.get_queryset())
+
+        serializer = ResponseSerializer({
+            'code': 200,
+            'status': 'success',
+            'recordsTotal': queryset.count(),
+            'data': UserSerializer(queryset, many=True).data,
+            'error': None,
+        })
 
         return Response(serializer.data)
 

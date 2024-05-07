@@ -5,6 +5,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
+import common.orderings
 from auth.auth import IsPengurus
 from events.models import Event
 from events.v1 import filtersets
@@ -16,8 +17,9 @@ class CMSEventViewSet(viewsets.ModelViewSet):
     queryset = Event.objects.all()
     serializer_class = EventSerializer
     permission_classes = [IsPengurus]
-    filter_backends = [filtersets.EventSearchFilter, django_filters.rest_framework.DjangoFilterBackend]
+    filter_backends = [filtersets.EventSearchFilter, django_filters.rest_framework.DjangoFilterBackend, common.orderings.KeywordOrderingFilter]
     filterset_class = filtersets.EventFilterSet
+    ordering_fields = ['id', 'name', 'createdAt', 'updatedAt', 'isActive']
 
     def create(self, request, *args, **kwargs):
         super(CMSEventViewSet, self).create(request, *args, **kwargs)
@@ -106,8 +108,9 @@ class PublicEventViewSet(viewsets.ModelViewSet):
     queryset = Event.objects.filter(is_active=True)
     serializer_class = EventSerializer
     permission_classes = [AllowAny]
-    filter_backends = [filtersets.EventSearchFilter, django_filters.rest_framework.DjangoFilterBackend]
+    filter_backends = [filtersets.EventSearchFilter, django_filters.rest_framework.DjangoFilterBackend, common.orderings.KeywordOrderingFilter]
     filterset_class = filtersets.EventFilterSet
+    ordering_fields = ['id', 'name', 'createdAt', 'updatedAt']
 
     def list(self, request, *args, **kwargs):
         if request.query_params.get('id'):
