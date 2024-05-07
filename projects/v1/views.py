@@ -8,6 +8,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 
 from auth.auth import IsPengurus
 from common.orderings import KeywordOrderingFilter
+from common.pagination import GenericPaginator
 
 from projects.v1.filtersets import ProjectFilter, ProjectSearchFilter
 
@@ -26,6 +27,7 @@ class CMSProjectViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend, KeywordOrderingFilter, ProjectSearchFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['created_at']
+    pagination_class = GenericPaginator
 
     def get_serializer_class(self):
         if self.action == 'create' or self.action == 'update' or self.action == 'list' or self.action == 'retrieve':
@@ -52,11 +54,13 @@ class CMSProjectViewSet(viewsets.ModelViewSet):
 
         queryset = self.filter_queryset(self.get_queryset().prefetch_related('contributors'))
 
+        page = self.paginate_queryset(queryset)
+
         serializer = ResponseSerializer({
             'code': 200,
             'status': 'success',
             'recordsTotal': queryset.count(),
-            'data': ProjectSerializer(queryset, many=True).data,
+            'data': ProjectSerializer(page, many=True).data,
             'error': None,
         })
 
@@ -172,6 +176,7 @@ class PublicProjectViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend, KeywordOrderingFilter, ProjectSearchFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['created_at']
+    pagination_class = GenericPaginator
 
     def list(self, request, *args, **kwargs):
         if request.query_params.get('id'):
@@ -189,11 +194,13 @@ class PublicProjectViewSet(viewsets.ModelViewSet):
 
         queryset = self.filter_queryset(self.get_queryset().prefetch_related('contributors'))
 
+        page = self.paginate_queryset(queryset)
+
         serializer = ResponseSerializer({
             'code': 200,
             'status': 'success',
             'recordsTotal': queryset.count(),
-            'data': ProjectSerializer(queryset, many=True).data,
+            'data': ProjectSerializer(page, many=True).data,
             'error': None,
         })
 

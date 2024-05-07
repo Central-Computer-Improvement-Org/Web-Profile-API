@@ -6,6 +6,8 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
 import common.orderings
+import common.pagination
+
 from auth.auth import IsPengurus
 from events.models import Event
 from events.v1 import filtersets
@@ -20,6 +22,7 @@ class CMSEventViewSet(viewsets.ModelViewSet):
     filter_backends = [filtersets.EventSearchFilter, django_filters.rest_framework.DjangoFilterBackend, common.orderings.KeywordOrderingFilter]
     filterset_class = filtersets.EventFilterSet
     ordering_fields = ['id', 'name', 'createdAt', 'updatedAt', 'isActive']
+    pagination_class = common.pagination.GenericPaginator
 
     def create(self, request, *args, **kwargs):
         super(CMSEventViewSet, self).create(request, *args, **kwargs)
@@ -50,11 +53,13 @@ class CMSEventViewSet(viewsets.ModelViewSet):
 
         events = self.filter_queryset(self.get_queryset())
 
+        page = self.paginate_queryset(events)
+
         serializer = ResponseSerializer({
             'code': 200,
             'status': 'success',
             'recordsTotal': events.count(),
-            'data': EventSerializer(events, many=True).data,
+            'data': EventSerializer(page, many=True).data,
             'error': None,
         })
 
@@ -111,6 +116,7 @@ class PublicEventViewSet(viewsets.ModelViewSet):
     filter_backends = [filtersets.EventSearchFilter, django_filters.rest_framework.DjangoFilterBackend, common.orderings.KeywordOrderingFilter]
     filterset_class = filtersets.EventFilterSet
     ordering_fields = ['id', 'name', 'createdAt', 'updatedAt']
+    pagination_class = common.pagination.GenericPaginator
 
     def list(self, request, *args, **kwargs):
         if request.query_params.get('id'):
@@ -128,11 +134,13 @@ class PublicEventViewSet(viewsets.ModelViewSet):
 
         events = self.filter_queryset(self.get_queryset())
 
+        page = self.paginate_queryset(events)
+
         serializer = ResponseSerializer({
             'code': 200,
             'status': 'success',
             'recordsTotal': events.count(),
-            'data': EventSerializer(events, many=True).data,
+            'data': EventSerializer(page, many=True).data,
             'error': None,
         })
 
