@@ -53,13 +53,14 @@ class UserProfileViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
 class PublicUserViewSet(viewsets.ModelViewSet):
-    queryset = User.objects.all()
+    queryset = User.objects.filter(active=True)
     permission_classes = [AllowAny]
     filter_backends = [filtersets.UserSearchFilter, django_filters.rest_framework.DjangoFilterBackend,
                        common.orderings.KeywordOrderingFilter]
     filterset_class = filtersets.UserFilterSet
     ordering_fields = ['createdAt', 'updatedAt']
     ordering = ['created_at']
+    pagination_class = common.pagination.GenericPaginator
 
     def list(self, request, *args, **kwargs):
         if request.query_params.get('nim'):
@@ -77,11 +78,13 @@ class PublicUserViewSet(viewsets.ModelViewSet):
 
         queryset = self.filter_queryset(self.get_queryset())
 
+        page = self.paginate_queryset(queryset)
+
         serializer = ResponseSerializer({
             'code': 200,
             'status': 'success',
             'recordsTotal': queryset.count(),
-            'data': UserSerializer(queryset, many=True).data,
+            'data': UserSerializer(page, many=True).data,
             'error': None,
         })
 
@@ -95,8 +98,9 @@ class UserViewSet(viewsets.ModelViewSet):
     filter_backends = [filtersets.UserSearchFilter, django_filters.rest_framework.DjangoFilterBackend,
                        common.orderings.KeywordOrderingFilter]
     filterset_class = filtersets.UserFilterSet
-    ordering_fields = ['createdAt', 'updatedAt']
+    ordering_fields = ['createdAt', 'updatedAt', 'name']
     ordering = ['created_at']
+    pagination_class = common.pagination.GenericPaginator
 
     def list(self, request, *args, **kwargs):
         if request.query_params.get('nim'):
@@ -114,11 +118,13 @@ class UserViewSet(viewsets.ModelViewSet):
 
         queryset = self.filter_queryset(self.get_queryset())
 
+        page = self.paginate_queryset(queryset)
+
         serializer = ResponseSerializer({
             'code': 200,
             'status': 'success',
             'recordsTotal': queryset.count(),
-            'data': UserSerializer(queryset, many=True).data,
+            'data': UserSerializer(page, many=True).data,
             'error': None,
         })
 
@@ -177,6 +183,7 @@ class CMSDivisionViewSet(viewsets.ModelViewSet):
     filter_backends = [django_filters.rest_framework.DjangoFilterBackend, common.orderings.KeywordOrderingFilter]
     ordering_fields = ['name', 'description', 'createdAt', 'updatedAt']
     ordering = ['name']
+    pagination_class = common.pagination.GenericPaginator
 
     def list(self, request, *args, **kwargs):
         if request.query_params.get('id'):
@@ -194,11 +201,13 @@ class CMSDivisionViewSet(viewsets.ModelViewSet):
 
         queryset = self.filter_queryset(self.get_queryset())
 
+        page = self.paginate_queryset(queryset)
+
         serializer = ResponseSerializer({
             'code': 200,
             'status': 'success',
             'recordsTotal': queryset.count(),
-            'data': DivisionSerializer(queryset, many=True).data,
+            'data': DivisionSerializer(page, many=True).data,
             'error': None,
         })
 
@@ -249,6 +258,10 @@ class CMSDivisionViewSet(viewsets.ModelViewSet):
 class PublicDivisionViewSet(viewsets.ModelViewSet):
     serializer_class = DivisionSerializer
     permission_classes = [AllowAny]
+    pagination_class = common.pagination.GenericPaginator
+    filter_backends = [django_filters.rest_framework.DjangoFilterBackend, common.orderings.KeywordOrderingFilter]
+    ordering_fields = ['name', 'description', 'createdAt', 'updatedAt']
+    ordering = ['name']
 
     def list(self, request, *args, **kwargs):
         if request.query_params.get('id'):
@@ -393,7 +406,7 @@ class PublicRoleViewSet(viewsets.ModelViewSet):
     filter_backends = [django_filters.rest_framework.DjangoFilterBackend, KeywordOrderingFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['created_at']
-    pagination_class = GenericPaginator
+    pagination_class = common.pagination.GenericPaginator
 
     def list(self, request, *args, **kwargs):
         if request.query_params.get('id'):
