@@ -11,13 +11,13 @@ urlpatterns_v1_cms = [
         'patch': 'update',
         'delete': 'destroy',
     }), name='cms_users'),
-    path('roles', CMSRoleViewSet.as_view({
+    path('/roles', CMSRoleViewSet.as_view({
         'get': 'list',
         'post': 'create',
         'patch': 'update',
         'delete': 'destroy',
     }), name='cms_roles'),
-    path("divisions", CMSDivisionViewSet.as_view({
+    path("/divisions", CMSDivisionViewSet.as_view({
         'get': 'list',
         'delete': 'destroy',
         'post': 'create',
@@ -30,13 +30,13 @@ urlpatterns_v1_public = [
     path('', PublicUserViewSet.as_view({
         'get': 'list',
     }), name='users'),
-    path('profile', UserProfileViewSet.as_view({
+    path('/profile', UserProfileViewSet.as_view({
         'get': 'retrieve',
     }), name='profile'),
-    path('divisions', PublicDivisionViewSet.as_view({
+    path('/divisions', PublicDivisionViewSet.as_view({
         'get': 'list',
     }), name='divisions'),
-    path('roles', PublicRoleViewSet.as_view({
+    path('/roles', PublicRoleViewSet.as_view({
         'get': 'list',
     }), name='roles'),
 ]

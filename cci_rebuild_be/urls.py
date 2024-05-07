@@ -15,8 +15,8 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.urls import path, include
-from django.conf.urls.static import static
 from django.conf import settings
+from django.conf.urls.static import static
 
 from users.urls import urlpatterns_v1_cms as userv1_cms_urls
 from users.urls import urlpatterns_v1_public as userv1_urls
@@ -36,23 +36,23 @@ handler404 = "common.handler_views.error_404"
 
 
 urlpatterns = [
-    path('api/', include([
-        path('v1/', include([
-            path('cms/', include([
-                path('users/', include(userv1_cms_urls)),
-                path('settings/', include(settingv1_cms_urls)),
-                path('news/', include(cms_news_v1_urls)),
-                path('projects/', include(projectv1_cms_urls)),
-                path('awards/', include(awardv1_cms_urls)),
-                path('events', include(eventsv1_cms_urls))
+    path('api', include([
+        path('/v1', include([
+            path('/cms', include([
+                path('/users', include(userv1_cms_urls)),
+                path('/settings', include(settingv1_cms_urls)),
+                path('/news', include(cms_news_v1_urls)),
+                path('/projects', include(projectv1_cms_urls)),
+                path('/awards', include(awardv1_cms_urls)),
+                path('/events', include(eventsv1_cms_urls))
             ])),
-            path('users/', include(userv1_urls)),
-            path('auth/', include(authv1_urls)),
-            path('settings/', include(settingv1_public_urls)),
-            path('news/', include(public_news_v1_urls)),
-            path('projects/', include(projectv1_public_urls)),
-            path('awards/', include(awardv1_public_urls)),
-            path('events', include(eventsv1_public_urls))
+            path('/users', include(userv1_urls)),
+            path('/auth', include(authv1_urls)),
+            path('/settings', include(settingv1_public_urls)),
+            path('/news', include(public_news_v1_urls)),
+            path('/projects', include(projectv1_public_urls)),
+            path('/awards', include(awardv1_public_urls)),
+            path('/events', include(eventsv1_public_urls))
         ])),
     ])),
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

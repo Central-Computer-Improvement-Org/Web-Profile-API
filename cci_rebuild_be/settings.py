@@ -17,6 +17,13 @@ import os
 
 load_dotenv()
 
+# SSL_CERTIFICATE = '/etc/letsencrypt/live/103-31-38-146.sslip.io/fullchain.pem'
+# SSL_PRIVATE_KEY = '/etc/letsencrypt/live/103-31-38-146.sslip.io/privkey.pem'
+# SECURE_SSL_REDIRECT = True
+# SESSION_COOKIE_SECURE = True
+# CSRF_COOKIE_SECURE = True
+# SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -30,7 +37,7 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = ["*", '[::1]', '103-31-38-146.sslip.io']
 
 
 # Application definition
@@ -148,18 +155,22 @@ AUTH_USER_MODEL = 'users.User'
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_URL = 'static/'
-STATIC_ROOT = os.path.join(BASE_DIR, STATIC_URL)
 
+STATIC_URL = '/static/'
 MEDIA_URL = '/media/'
+
+APPEND_SLASH=False
+
 MEDIA_ROOT= os.path.join(BASE_DIR, 'media')
+
+import os
+STATIC_ROOT = os.path.join(BASE_DIR, STATIC_URL)
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-APPEND_SLASH = False
 
 # Rest Framework settings
 
