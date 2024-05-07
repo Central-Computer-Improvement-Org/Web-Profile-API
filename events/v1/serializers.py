@@ -1,6 +1,9 @@
+from datetime import datetime
+
 from django.utils import timezone
 from rest_framework import serializers
 
+from common.utils import rename_image_file
 from events.models import Event
 from users.v1.serializers import DivisionSerializer
 
@@ -22,16 +25,12 @@ class EventSerializer(serializers.ModelSerializer):
         required_fields = [
             'title',
             'description',
-            'start_date',
-            'end_date',
             'is_active',
         ]
 
     def to_representation(self, instance):
         response = super().to_representation(instance)
 
-        response['startDate'] = response.pop('start_date', None)
-        response['endDate'] = response.pop('end_date', None)
         response['divisionId'] = response.pop('division_id', None)
         response['division'] = response.pop('division', None)
         response['createdAt'] = response.pop('created_at', None)
@@ -50,20 +49,16 @@ class EventSerializer(serializers.ModelSerializer):
         if 'isActive' in data:
             new_data['is_active'] = data.get('isActive', None)
 
-        if 'startDate' in data:
-            new_data['start_date'] = data.get('startDate', None)
-
-        if 'endDate' in data:
-            new_data['end_date'] = data.get('endDate', None)
-
         if 'divisionId' in data:
             new_data['division_id'] = data.get('divisionId', None)
 
         if 'heldOn' in data:
             new_data['held_on'] = data.get('heldOn', None)
+            new_data['held_on'] = datetime.strptime(new_data['held_on'], '%d-%m-%Y').date()
 
         if 'mediaUri' in data:
             new_data['media_uri'] = data.get('mediaUri', None)
+            new_data['media_uri'] = rename_image_file(new_data['media_uri'], prefix="EVT")
 
         return super().to_internal_value(new_data)
 
@@ -82,7 +77,7 @@ class EventSerializer(serializers.ModelSerializer):
         return super(EventSerializer, self).update(instance, validated_data)
 
     def delete(self, instance):
-        instance.is_published = False
+        instance.is_active = False
         instance.save()
 
         return instance
