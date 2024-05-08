@@ -18,6 +18,8 @@ from . import filtersets
 from common.orderings import KeywordOrderingFilter
 from common.pagination import GenericPaginator
 
+from django.db.models import Q
+
 from .serializers import UserSerializer, DivisionSerializer, RoleSerializer
 from ..models import User, Role, Division
 
@@ -53,6 +55,7 @@ class UserProfileViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
 class PublicUserViewSet(viewsets.ModelViewSet):
+    serializer_class=UserSerializer
     queryset = User.objects.filter(active=True)
     permission_classes = [AllowAny]
     filter_backends = [filtersets.UserSearchFilter, django_filters.rest_framework.DjangoFilterBackend,
@@ -65,20 +68,27 @@ class PublicUserViewSet(viewsets.ModelViewSet):
 
     def list(self, request, *args, **kwargs):
         if request.query_params.get('nim'):
-            user = User.objects.get(nim=request.query_params.get('nim'))
+            try :
+                user = User.objects.get(nim=request.query_params.get('nim'))
 
-            serializer = ResponseSerializer({
-                'code': 200,
-                'status': 'success',
-                'recordsTotal': 1,
-                'data': UserSerializer(user).data,
-                'error': None,
-            })
+                if user.role.name == 'Superadmin':
+                    raise NotFound('User not found!')
 
-            return Response(serializer.data)
+                serializer = ResponseSerializer({
+                    'code': 200,
+                    'status': 'success',
+                    'recordsTotal': 1,
+                    'data': UserSerializer(user).data,
+                    'error': None,
+                })
+
+                return Response(serializer.data)
+            except User.DoesNotExist:
+                raise NotFound('User not found!')
 
         queryset = self.filter_queryset(self.get_queryset())
-
+        queryset = queryset.exclude(role_id__name='Superadmin')
+        
         page = self.paginate_queryset(queryset)
 
         serializer = ResponseSerializer({
@@ -99,7 +109,7 @@ class UserViewSet(viewsets.ModelViewSet):
     filter_backends = [filtersets.UserSearchFilter, django_filters.rest_framework.DjangoFilterBackend,
                        common.orderings.KeywordOrderingFilter]
     filterset_class = filtersets.UserFilterSet
-    ordering_fields = ['createdAt', 'updatedAt', 'name']
+    ordering_fields = ['createdAt', 'updatedAt', 'name', 'roleId', 'divisionId']
     ordering = ['created_at']
     pagination_class = common.pagination.GenericPaginator
 
@@ -415,17 +425,27 @@ class CMSRoleViewSet(viewsets.ModelViewSet):
         try:
             role = Role.objects.get(id=id)
 
-            self.perform_destroy(role)
-
             resp = ResponseSerializer({
-                'code': 200,
-                'status': 'success',
+                'code': 666,
+                'status': 'Mikiro',
                 'recordsTotal': 0,
                 'data': {
-                    'message': 'Delete role success',
+                    'message': 'Superadmin Raiso dibusek cok',
                 },
                 'error': None,
             })
+
+            if role.name != 'Superadmin':
+                self.perform_destroy(role)
+                resp = ResponseSerializer({
+                    'code': 200,
+                    'status': 'success',
+                    'recordsTotal': 0,
+                    'data': {
+                        'message': 'Delete role success',
+                    },
+                    'error': None,
+                })
 
             return Response(resp.data)
 

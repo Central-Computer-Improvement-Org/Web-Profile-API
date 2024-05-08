@@ -84,7 +84,7 @@ class CMSAwardViewSet(viewsets.ModelViewSet):
             members_arr = json.loads(members)
         
         if isinstance(members_arr, list) and len(members_arr) > 0:
-            for member in members:
+            for member in members_arr:
                 detail_contributor_data = {
                     'member_nim': member,
                     'award_id': award_instance['id'],  
@@ -125,11 +125,16 @@ class CMSAwardViewSet(viewsets.ModelViewSet):
             with transaction.atomic():
                 award_serializer.save()
 
-                members = request.data.getlist('contributors')
+                members = request.data.get('contributors')
+
+                members_arr = []
+
+                if members is not None and members is not '':
+                    members_arr = json.loads(members)
                 
-                if len(members) > 0:
+                if isinstance(members_arr, list) and len(members_arr) > 0:
                     DetailContributorAward.objects.filter(award_id=id).delete()
-                    for member in members:
+                    for member in members_arr:
                         detail_contributor_data = {
                             'member_nim': member,
                             'award_id': id,  
