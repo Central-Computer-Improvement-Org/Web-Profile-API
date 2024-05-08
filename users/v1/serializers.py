@@ -31,14 +31,15 @@ class RoleSerializer(serializers.ModelSerializer):
         ]
 
     def create(self, validated_data):
-        validated_data['id'] = id_generator(prefix="RLE")
-        
+
         if self.context['request'].user.is_authenticated:
             validated_data['created_by'] = self.context['request'].user.nim
             validated_data['updated_by'] = self.context['request'].user.nim
         else:
             validated_data['created_by'] = "system"
             validated_data['updated_by'] = "system"
+
+        validated_data['id'] = id_generator(prefix="RLE")
 
         return super(RoleSerializer, self).create(validated_data)
 
