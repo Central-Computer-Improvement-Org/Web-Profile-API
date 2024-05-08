@@ -146,7 +146,9 @@ class UserViewSet(viewsets.ModelViewSet):
                 'code': 200,
                 'status': 'success',
                 'recordsTotal': 1,
-                'data': None,
+                'data': {
+                    "message": "Update user success",
+                },
                 'error': None,
             })
 
@@ -168,7 +170,9 @@ class UserViewSet(viewsets.ModelViewSet):
             'code': 200,
             'status': 'success',
             'recordsTotal': 1,
-            'data': None,
+            'data': {
+                "message": "Delete user success",
+            },
             'error': None,
         })
 
@@ -224,7 +228,9 @@ class CMSDivisionViewSet(viewsets.ModelViewSet):
             'code': 200,
             'status': 'success',
             'recordsTotal': 1,
-            'data': None,
+            'data': {
+                "message": "Delete division success",
+            },
             'error': None,
         })
 
@@ -248,7 +254,9 @@ class CMSDivisionViewSet(viewsets.ModelViewSet):
             'code': 200,
             'status': 'success',
             'recordsTotal': 1,
-            'data': None,
+            'data': {
+                "message": "Update division success",
+            },
             'error': None,
         })
 
@@ -337,7 +345,9 @@ class CMSRoleViewSet(viewsets.ModelViewSet):
             'code': 201,
             'status': 'success',
             'recordsTotal': 1,
-            'data': RoleSerializer(role.data).data,
+            'data': {
+                'message': 'Create role success',
+            },
             'error': None,
         })
 
@@ -363,7 +373,9 @@ class CMSRoleViewSet(viewsets.ModelViewSet):
                 'code': 204,
                 'status': 'success',
                 'recordsTotal': 1,
-                'data': serializers.data,
+                'data': {
+                    'message': 'Update role success',
+                },
                 'error': None,
             })
 
@@ -387,7 +399,9 @@ class CMSRoleViewSet(viewsets.ModelViewSet):
                 'code': 204,
                 'status': 'success',
                 'recordsTotal': 0,
-                'data': None,
+                'data': {
+                    'message': 'Delete role success',
+                },
                 'error': None,
             })
 

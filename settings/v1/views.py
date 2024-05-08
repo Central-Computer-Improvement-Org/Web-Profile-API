@@ -40,7 +40,9 @@ class CMSSettingViewSet(viewsets.ModelViewSet):
             'code': 200,
             'status': 'success',
             'recordsTotal': 1,
-            'data': SettingSerializer(setting).data,
+            'data': {
+                "message": "Update settings success"
+            },
             'error': None,
         })
 
@@ -149,7 +151,9 @@ class CMSContactViewSet(viewsets.ModelViewSet):
             'code': 201,
             'status': 'success',
             'recordsTotal': 1,
-            'data': serializer.data,
+            'data': {
+                'message': 'Create contact success'
+            },
             'error': None,
         })
 
@@ -176,7 +180,9 @@ class CMSContactViewSet(viewsets.ModelViewSet):
                 'code': 204,
                 'status': 'success',
                 'recordsTotal': 1,
-                'data': ContactSerializer(contact).data,
+                'data': {
+                    'message': 'Update contact success'
+                },
                 'error': None,
             })
 
@@ -202,7 +208,9 @@ class CMSContactViewSet(viewsets.ModelViewSet):
                 'code': 204,
                 'status': 'success',
                 'recordsTotal': 0,
-                'data': None,
+                'data': {
+                    'message': 'Delete contact success'
+                },
                 'error': None,
             })
 

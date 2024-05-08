@@ -31,7 +31,9 @@ class CMSEventViewSet(viewsets.ModelViewSet):
             'code': 200,
             'status': 'success',
             'recordsTotal': 1,
-            'data': None,
+            'data': {
+                "message": "Created event successfully"
+            },
             'error': None,
         })
 
@@ -83,7 +85,9 @@ class CMSEventViewSet(viewsets.ModelViewSet):
             'code': 200,
             'status': 'success',
             'recordsTotal': 1,
-            'data': None,
+            'data': {
+                "message": "Updated event successfully"
+            },
             'error': None,
         })
 
@@ -102,7 +106,9 @@ class CMSEventViewSet(viewsets.ModelViewSet):
             'code': 200,
             'status': 'success',
             'recordsTotal': 1,
-            'data': None,
+            'data': {
+                "message": "Deleted event successfully"
+            },
             'error': None,
         })
 

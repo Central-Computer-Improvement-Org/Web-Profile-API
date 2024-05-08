@@ -101,7 +101,9 @@ class CMSAwardViewSet(viewsets.ModelViewSet):
             'code': 201,
             'status': 'success',
             'recordsTotal': 1,
-            'data': AwardSerializer(award,many=False).data,
+            'data': {
+                "message": "Created award successfully",
+            },
             'error': None,
         })
 
@@ -140,7 +142,9 @@ class CMSAwardViewSet(viewsets.ModelViewSet):
                 'code': 204,
                 'status': 'success',
                 'recordsTotal': 1,
-                'data': AwardSerializer(award).data,
+                'data': {
+                    "message": "Updated award successfully",
+                },
                 'error': None,
             })
 
@@ -166,7 +170,9 @@ class CMSAwardViewSet(viewsets.ModelViewSet):
                 'code': 204,
                 'status': 'success',
                 'recordsTotal': 0,
-                'data': None,
+                'data': {
+                    "message": "Deleted award successfully",
+                },
                 'error': None,
             })
 

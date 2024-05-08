@@ -84,7 +84,9 @@ class RegisterViewSet(viewsets.ModelViewSet):
             'code': 201,
             'status': 'success',
             'recordsTotal': 1,
-            'data': serializer.data,
+            'data': {
+                "message": "User created successfully"
+            },
             'error': None,
         })
 

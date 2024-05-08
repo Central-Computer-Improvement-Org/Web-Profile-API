@@ -91,13 +91,13 @@ class CMSProjectViewSet(viewsets.ModelViewSet):
                 if detail_contributor_serializer.is_valid():
                     detail_contributor_serializer.save()
 
-        project = Project.objects.get(id=project_instance['id'])
-                
         resp = ResponseSerializer({
             'code': 201,
             'status': 'success',
             'recordsTotal': 1,
-            'data': ProjectSerializer(project,many=False).data,
+            'data': {
+                "message": "Created project successfully",
+            },
             'error': None,
         })
 
@@ -136,7 +136,9 @@ class CMSProjectViewSet(viewsets.ModelViewSet):
                 'code': 204,
                 'status': 'success',
                 'recordsTotal': 1,
-                'data': ProjectSerializer(project).data,
+                'data': {
+                    "message": "Updated project successfully"
+                },
                 'error': None,
             })
 
@@ -166,7 +168,9 @@ class CMSProjectViewSet(viewsets.ModelViewSet):
                 'code': 204,
                 'status': 'success',
                 'recordsTotal': 0,
-                'data': None,
+                'data': {
+                    "message": "Deleted project successfully"
+                },
                 'error': None,
             })
 

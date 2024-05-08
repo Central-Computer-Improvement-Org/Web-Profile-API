@@ -37,7 +37,9 @@ class CMSNewsViewSet(viewsets.ModelViewSet):
             'code': 200,
             'status': 'success',
             'recordsTotal': 1,
-            'data': None,
+            'data': {
+                "message": "Created news successfully"
+            },
             'error': None,
         })
 
@@ -54,7 +56,9 @@ class CMSNewsViewSet(viewsets.ModelViewSet):
             'code': 200,
             'status': 'success',
             'recordsTotal': 1,
-            'data': None,
+            'data': {
+                "message": "Deleted news successfully"
+            },
             'error': None,
         })
 
@@ -77,7 +81,9 @@ class CMSNewsViewSet(viewsets.ModelViewSet):
             'code': 200,
             'status': 'success',
             'recordsTotal': 1,
-            'data': None,
+            'data': {
+                "message": "Updated news successfully"
+            },
             'error': None,
         })
 
@@ -172,7 +178,9 @@ class CMSDetailNewsMediaViewSet(viewsets.ModelViewSet):
             'code': 200,
             'status': 'success',
             'recordsTotal': 1,
-            'data': None,
+            'data': {
+                "message": "Created detail news media successfully"
+            },
             'error': None,
         })
 
@@ -189,7 +197,9 @@ class CMSDetailNewsMediaViewSet(viewsets.ModelViewSet):
             'code': 200,
             'status': 'success',
             'recordsTotal': 1,
-            'data': None,
+            'data': {
+                "message": "Deleted detail news media successfully"
+            },
             'error': None,
         })
 
@@ -212,7 +222,9 @@ class CMSDetailNewsMediaViewSet(viewsets.ModelViewSet):
             'code': 200,
             'status': 'success',
             'recordsTotal': 1,
-            'data': None,
+            'data': {
+                "message": "Updated detail news media successfully"
+            },
             'error': None,
         })
 
