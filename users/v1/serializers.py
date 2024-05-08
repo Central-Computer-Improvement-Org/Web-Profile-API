@@ -93,15 +93,15 @@ class DivisionSerializer(serializers.ModelSerializer):
         response['id'] = response.pop('id', None)
         response['name'] = response.pop('name', None)
         response['description'] = response.pop('description', None)
-        response['logo'] = response.pop('logo', None)
+        response['logoUri'] = response.pop('logo_uri', None)
 
         return response
 
     def to_internal_value(self, data):
         new_data = copy.deepcopy(data)
 
-        if "logo" in data:
-            new_data['logo'] = utils.rename_image_file(new_data['logo'], prefix="EVT")
+        if "logoUri" in data:
+            new_data['logo_uri'] = utils.rename_image_file(new_data['logoUri'], prefix="DVS")
 
         return super().to_internal_value(new_data)
 
