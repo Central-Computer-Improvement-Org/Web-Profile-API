@@ -22,6 +22,8 @@ from generic_serializers.serializers import ResponseSerializer
 from .serializers import AwardSerializer, DetailContributorAwardSerializer
 from ..models import Award, DetailContributorAward
 
+import json
+
 class CMSAwardViewSet(viewsets.ModelViewSet):
     award_queryset = Award.objects.all()
     contributor_queryset = DetailContributorAward.objects.all()
@@ -75,9 +77,13 @@ class CMSAwardViewSet(viewsets.ModelViewSet):
         serializerAward = super(CMSAwardViewSet, self).create(request, *args, **kwargs)
         award_instance = serializerAward.data
 
-        members = request.data.getlist('contributors')
+        members = request.data.get('contributors')
+        members_arr = []
 
-        if members is not None:
+        if members is not None and members is not '':
+            members_arr = json.loads(members)
+        
+        if isinstance(members_arr, list) and len(members_arr) > 0:
             for member in members:
                 detail_contributor_data = {
                     'member_nim': member,

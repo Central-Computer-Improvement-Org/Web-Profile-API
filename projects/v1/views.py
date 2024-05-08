@@ -74,9 +74,12 @@ class CMSProjectViewSet(viewsets.ModelViewSet):
 
         members = request.data.get('contributors')
 
-        members_arr = json.loads(members)
+        members_arr = []
+
+        if members is not None and members is not '':
+            members_arr = json.loads(members)
         
-        if members_arr is not []:
+        if isinstance(members_arr, list) and len(members_arr) > 0:
             for member in members_arr:
                 detail_contributor_data = {
                     'member_nim': member,
