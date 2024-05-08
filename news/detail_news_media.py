@@ -3,13 +3,15 @@ from django.utils import timezone
 
 from news.news_models import News
 
+from common.validators import validate_image_size
+
 
 class DetailNewsMedia(models.Model):
     id = models.CharField(max_length=255, primary_key=True)
     news_id = models.ForeignKey(News, on_delete=models.PROTECT)
     title = models.CharField(max_length=255)
     description = models.TextField()
-    media_uri = models.ImageField(upload_to="uploads/news/media/")
+    media_uri = models.ImageField(upload_to="uploads/news/media/", validators=[validate_image_size])
 
     created_at = models.DateTimeField(auto_now_add=True, null=True)
     updated_at = models.DateTimeField(auto_now_add=True, null=True)

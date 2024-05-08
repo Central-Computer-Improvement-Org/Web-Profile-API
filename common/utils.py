@@ -31,3 +31,9 @@ def camel_to_snake(camel_str):
 def delete_old_file(file_path):
     if os.path.exists(file_path):
         os.remove(file_path)
+
+def validate_image_size(value):
+    filesize = value.size
+    
+    if filesize > 2 * 1024 * 1024:  # 2MB
+        raise ValidationError("The maximum file size that can be uploaded is 2MB")

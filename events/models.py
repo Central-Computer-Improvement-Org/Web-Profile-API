@@ -2,6 +2,8 @@ from django.db import models
 
 from users.models_divisions import Division
 
+from common.validators import validate_image_size
+
 
 # Create your models here.
 
@@ -10,7 +12,7 @@ class Event(models.Model):
     name = models.CharField(max_length=15)
     description = models.CharField(max_length=130)
     division_id = models.ForeignKey(Division, on_delete=models.SET_NULL, null=True)
-    media_uri = models.ImageField(upload_to="uploads/events/thumbnails/")
+    media_uri = models.ImageField(upload_to="uploads/events/thumbnails/", validators=[validate_image_size])
     held_on = models.DateField()
     budget = models.IntegerField()
 
