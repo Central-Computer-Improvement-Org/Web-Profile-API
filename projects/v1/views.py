@@ -17,6 +17,8 @@ from generic_serializers.serializers import ResponseSerializer
 from .serializers import ProjectSerializer, DetailContributorProjectSerializer
 from ..models import Project, DetailContributorProject
 
+import json
+
 class CMSProjectViewSet(viewsets.ModelViewSet):
     project_queryset = Project.objects.all()
     contributor_queryset = DetailContributorProject.objects.all()
@@ -70,10 +72,12 @@ class CMSProjectViewSet(viewsets.ModelViewSet):
         serializerProject = super(CMSProjectViewSet, self).create(request, *args, **kwargs)
         project_instance = serializerProject.data
 
-        members = request.data.getlist('contributors')
+        members = request.data.get('contributors')
 
-        if members is not None:
-            for member in members:
+        members_arr = json.loads(members)
+        
+        if members_arr is not []:
+            for member in members_arr:
                 detail_contributor_data = {
                     'member_nim': member,
                     'project_id': project_instance['id'],  

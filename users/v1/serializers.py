@@ -49,12 +49,13 @@ class RoleSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         response = super().to_representation(instance)
 
+        response['id'] = response.pop('id', None)
+        response['name'] = response.pop('name', None)
         response['createdAt'] = response.pop('created_at', None)
         response['updatedAt'] = response.pop('updated_at', None)
         response['createdBy'] = response.pop('created_by', None)
         response['updatedBy'] = response.pop('updated_by', None)
-        response['id'] = response.pop('id', None)
-        response['name'] = response.pop('name', None)
+        
 
         return response
 
@@ -86,14 +87,15 @@ class DivisionSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         response = super().to_representation(instance)
 
-        response['createdAt'] = response.pop('created_at', None)
-        response['updatedAt'] = response.pop('updated_at', None)
-        response['createdBy'] = response.pop('created_by', None)
-        response['updatedBy'] = response.pop('updated_by', None)
         response['id'] = response.pop('id', None)
         response['name'] = response.pop('name', None)
         response['description'] = response.pop('description', None)
         response['logo'] = response.pop('logo', None)
+        response['createdAt'] = response.pop('created_at', None)
+        response['updatedAt'] = response.pop('updated_at', None)
+        response['createdBy'] = response.pop('created_by', None)
+        response['updatedBy'] = response.pop('updated_by', None)
+        
 
         return response
 
