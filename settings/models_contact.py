@@ -1,11 +1,13 @@
 from django.db import models
 
+from common.validators import validate_image_size
+
 class Contact(models.Model):
     id = models.CharField(primary_key=True, max_length=255)
 
     platform = models.CharField(max_length=255)
     account_uri = models.CharField(max_length=255)
-    icon_uri = models.ImageField(upload_to='uploads/contact/')
+    icon_uri = models.ImageField(upload_to='uploads/contact/', validators=[validate_image_size])
     is_active = models.BooleanField(default=False)
 
     value = models.CharField(max_length=255, null=True)

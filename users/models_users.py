@@ -6,6 +6,8 @@ from .models_divisions import Division
 from .manager import UserManager
 from .models_roles import Role
 
+from common.validators import validate_image_size
+
 
 class User(AbstractBaseUser):
     nim = models.CharField(max_length=255, primary_key=True)
@@ -16,7 +18,7 @@ class User(AbstractBaseUser):
     major = models.CharField(max_length=255, null=True)
     linkedin_uri = models.CharField(null=True, max_length=255)
     phone_number = models.CharField(unique=True, max_length=255)
-    profile_uri = models.ImageField(upload_to="uploads/user/profile/")
+    profile_uri = models.ImageField(upload_to="uploads/user/profile/", validators=[validate_image_size])
 
     year_university_enrolled = models.DateField(null=True)
     year_community_enrolled = models.DateField(null=True)
