@@ -188,6 +188,7 @@ class PublicProjectViewSet(viewsets.ModelViewSet):
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['created_at']
     pagination_class = GenericPaginator
+    authentication_classes = []
 
     def list(self, request, *args, **kwargs):
         if request.query_params.get('id'):
