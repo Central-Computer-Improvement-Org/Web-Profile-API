@@ -119,11 +119,16 @@ class CMSProjectViewSet(viewsets.ModelViewSet):
             with transaction.atomic():
                 project_serializer.save()
 
-                members = request.data.getlist('contributors')
+                members = request.data.get('contributors')
+
+                members_arr = []
+
+                if members is not None and members is not '':
+                    members_arr = json.loads(members)
                 
-                if len(members) > 0:
+                if isinstance(members_arr, list) and len(members_arr) > 0:
                     DetailContributorProject.objects.filter(project_id=id).delete()
-                    for member in members:
+                    for member in members_arr:
                         detail_contributor_data = {
                             'member_nim': member,
                             'project_id': id,  
