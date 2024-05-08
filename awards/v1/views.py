@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError, NotFound
 from rest_framework.permissions import AllowAny, IsAuthenticated
 
-from auth.auth import IsPengurus
+from auth.auth import IsNotMember
 
 from common.orderings import KeywordOrderingFilter
 from common.utils import id_generator
@@ -29,7 +29,7 @@ class CMSAwardViewSet(viewsets.ModelViewSet):
     contributor_queryset = DetailContributorAward.objects.all()
     award_serializer_class = AwardSerializer
     contributor_serializer_class = DetailContributorAwardSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsNotMember]
     filterset_class = AwardFilter
     filter_backends = [DjangoFilterBackend, KeywordOrderingFilter, AwardSearchFilter]
     ordering_fields = ['created_at', 'updated_at']

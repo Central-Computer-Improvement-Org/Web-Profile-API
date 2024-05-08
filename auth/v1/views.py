@@ -6,7 +6,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
-from auth.auth import IsPengurus
+from auth.auth import IsNotMember
 #from common.exceptions import validation_exception_handler
 from users.models import User
 from users.v1.serializers import UserSerializer
@@ -69,7 +69,7 @@ class RefreshToken(TokenRefreshView):
 
 class RegisterViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
-    permission_classes = [IsPengurus]
+    permission_classes = [IsNotMember]
     authentication_classes = [JWTAuthentication]
 
     def create(self, request, *args, **kwargs):

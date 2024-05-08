@@ -4,9 +4,9 @@ from django.db import transaction
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError, NotFound
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import AllowAny
 
-from auth.auth import IsPengurus
+from auth.auth import IsNotMember
 from common.orderings import KeywordOrderingFilter
 from common.pagination import GenericPaginator
 
@@ -24,7 +24,7 @@ class CMSProjectViewSet(viewsets.ModelViewSet):
     contributor_queryset = DetailContributorProject.objects.all()
     project_serializer_class = ProjectSerializer
     contributor_serializer_class = DetailContributorProjectSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsNotMember]
     filterset_class = ProjectFilter
     filter_backends = [DjangoFilterBackend, KeywordOrderingFilter, ProjectSearchFilter]
     ordering_fields = ['created_at', 'updated_at']
