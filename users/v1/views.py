@@ -61,6 +61,7 @@ class PublicUserViewSet(viewsets.ModelViewSet):
     ordering_fields = ['createdAt', 'updatedAt']
     ordering = ['created_at']
     pagination_class = common.pagination.GenericPaginator
+    authentication_classes = []
 
     def list(self, request, *args, **kwargs):
         if request.query_params.get('nim'):
@@ -290,6 +291,7 @@ class PublicDivisionViewSet(viewsets.ModelViewSet):
     filter_backends = [django_filters.rest_framework.DjangoFilterBackend, common.orderings.KeywordOrderingFilter]
     ordering_fields = ['name', 'description', 'createdAt', 'updatedAt']
     ordering = ['name']
+    authentication_classes = []
 
     def list(self, request, *args, **kwargs):
         if request.query_params.get('id'):
@@ -448,6 +450,7 @@ class PublicRoleViewSet(viewsets.ModelViewSet):
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['created_at']
     pagination_class = common.pagination.GenericPaginator
+    authentication_classes = []
 
     def list(self, request, *args, **kwargs):
         if request.query_params.get('id'):

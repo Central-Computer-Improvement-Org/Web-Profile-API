@@ -5,8 +5,7 @@
         "fields": {
             "name": "Central Computer Improvment", 
             "address": "Telkom University, Sukapura, Kabupaten Bandung, Jawa Barat", 
-            "telp": "082114220492", 
-            "description": "Unit Kegiatan Mahasiswa di Telkom University yang berfokus pada bidang ICT (Information, Communication and Technology).", 
+            "description": "Unit Kegiatan Mahasiswa di Telkom University yang berfokus pada bidang ICT (Information, Communication and Technology).",
             "logo_uri": "uploads/setting/default.png", 
             "title_website": "CCI", 
             "keyword": "Information, Communication, Technology",

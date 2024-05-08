@@ -75,6 +75,7 @@ class CMSSettingViewSet(viewsets.ModelViewSet):
 class PublicSettingViewSet(viewsets.ModelViewSet):
     serializer_class = SettingSerializer
     permission_classes = [AllowAny]
+    authentication_classes = []
 
     def retrieve(self, request, *args, **kwargs):
         setting = Setting.objects.first()
@@ -228,6 +229,7 @@ class PublicContactViewSet(viewsets.ModelViewSet):
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['created_at']
     pagination_class = GenericPaginator
+    authentication_classes = []
 
     def list(self, request, *args, **kwargs):
         if request.query_params.get('id'):
