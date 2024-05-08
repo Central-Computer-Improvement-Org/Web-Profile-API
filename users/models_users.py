@@ -9,8 +9,8 @@ from .models_roles import Role
 
 class User(AbstractBaseUser):
     nim = models.CharField(max_length=255, primary_key=True)
-    role_id = models.ForeignKey(Role, on_delete=models.PROTECT)
-    division_id = models.ForeignKey(Division, on_delete=models.PROTECT, null=True)
+    role_id = models.ForeignKey(Role, on_delete=models.SET_NULL, null=True)
+    division_id = models.ForeignKey(Division, on_delete=models.SET_NULL, null=True)
     name = models.CharField(max_length=255)
     email = models.EmailField(unique=True)
     major = models.CharField(max_length=255, null=True)
