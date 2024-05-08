@@ -139,7 +139,7 @@ class CMSAwardViewSet(viewsets.ModelViewSet):
                             detail_contributor_serializer.save()
                     
             resp = ResponseSerializer({
-                'code': 204,
+                'code': 200,
                 'status': 'success',
                 'recordsTotal': 1,
                 'data': {
@@ -148,7 +148,7 @@ class CMSAwardViewSet(viewsets.ModelViewSet):
                 'error': None,
             })
 
-            return Response(resp.data, status=status.HTTP_204_NO_CONTENT)
+            return Response(resp.data, status=status.HTTP_200_OK)
         
         except Award.DoesNotExist:
             raise NotFound('Award does not exist!')
@@ -167,7 +167,7 @@ class CMSAwardViewSet(viewsets.ModelViewSet):
             self.perform_destroy(award)
 
             resp = ResponseSerializer({
-                'code': 204,
+                'code': 200,
                 'status': 'success',
                 'recordsTotal': 0,
                 'data': {
@@ -176,7 +176,7 @@ class CMSAwardViewSet(viewsets.ModelViewSet):
                 'error': None,
             })
 
-            return Response(resp.data, status=status.HTTP_204_NO_CONTENT)
+            return Response(resp.data, status=status.HTTP_200_OK)
     
         except Award.DoesNotExist:
             raise NotFound('Award does not exist!')

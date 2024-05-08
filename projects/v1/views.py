@@ -133,7 +133,7 @@ class CMSProjectViewSet(viewsets.ModelViewSet):
                             detail_contributor_serializer.save()
                     
             resp = ResponseSerializer({
-                'code': 204,
+                'code': 200,
                 'status': 'success',
                 'recordsTotal': 1,
                 'data': {
@@ -142,7 +142,7 @@ class CMSProjectViewSet(viewsets.ModelViewSet):
                 'error': None,
             })
 
-            return Response(resp.data, status=status.HTTP_204_NO_CONTENT)
+            return Response(resp.data)
         
         except Project.DoesNotExist:
             raise NotFound('Project does not exist!')
@@ -165,7 +165,7 @@ class CMSProjectViewSet(viewsets.ModelViewSet):
             self.perform_destroy(project)
 
             resp = ResponseSerializer({
-                'code': 204,
+                'code': 200,
                 'status': 'success',
                 'recordsTotal': 0,
                 'data': {
@@ -174,7 +174,7 @@ class CMSProjectViewSet(viewsets.ModelViewSet):
                 'error': None,
             })
 
-            return Response(resp.data, status=status.HTTP_204_NO_CONTENT)
+            return Response(resp.data)
     
         except Project.DoesNotExist:
             raise NotFound('Project does not exist!')

@@ -46,7 +46,7 @@ class CMSSettingViewSet(viewsets.ModelViewSet):
             'error': None,
         })
 
-        return Response(resp.data, status=status.HTTP_204_NO_CONTENT)
+        return Response(resp.data)
     
     def retrieve(self, request, *args, **kwargs):
         setting = Setting.objects.first()
@@ -178,7 +178,7 @@ class CMSContactViewSet(viewsets.ModelViewSet):
             self.perform_update(serializer)
                     
             resp = ResponseSerializer({
-                'code': 204,
+                'code': 200,
                 'status': 'success',
                 'recordsTotal': 1,
                 'data': {
@@ -187,7 +187,7 @@ class CMSContactViewSet(viewsets.ModelViewSet):
                 'error': None,
             })
 
-            return Response(resp.data, status=status.HTTP_204_NO_CONTENT)
+            return Response(resp.data)
         
         except Contact.DoesNotExist:
             raise NotFound('Contact does not exist!')
@@ -206,7 +206,7 @@ class CMSContactViewSet(viewsets.ModelViewSet):
             self.perform_destroy(contact)
 
             resp = ResponseSerializer({
-                'code': 204,
+                'code': 200,
                 'status': 'success',
                 'recordsTotal': 0,
                 'data': {
@@ -215,7 +215,7 @@ class CMSContactViewSet(viewsets.ModelViewSet):
                 'error': None,
             })
 
-            return Response(resp.data, status=status.HTTP_204_NO_CONTENT)
+            return Response(resp.data)
     
         except Contact.DoesNotExist:
             raise NotFound('Contact does not exist!')
