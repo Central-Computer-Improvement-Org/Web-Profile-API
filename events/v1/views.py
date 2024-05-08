@@ -123,6 +123,7 @@ class PublicEventViewSet(viewsets.ModelViewSet):
     filterset_class = filtersets.EventFilterSet
     ordering_fields = ['id', 'name', 'createdAt', 'updatedAt']
     pagination_class = common.pagination.GenericPaginator
+    authentication_classes = []
 
     def list(self, request, *args, **kwargs):
         if request.query_params.get('id'):

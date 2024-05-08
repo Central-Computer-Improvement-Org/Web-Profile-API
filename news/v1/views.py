@@ -127,6 +127,7 @@ class PublicNewsViewSet(viewsets.ModelViewSet):
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['created_at']
     pagination_class = GenericPaginator
+    authentication_classes = []
 
     def list(self, request, *args, **kwargs):
         if request.query_params.get('id'):
@@ -229,6 +230,45 @@ class CMSDetailNewsMediaViewSet(viewsets.ModelViewSet):
         })
 
         return Response(serializer.data)
+
+    def list(self, request, *args, **kwargs):
+        if request.query_params.get('id'):
+            detail_news_media = DetailNewsMedia.objects.get(id=request.query)
+            serializer = ResponseSerializer({
+                'code': 200,
+                'status': 'success',
+                'recordsTotal': 1,
+                'data': DetailNewsMediaSerializer(detail_news_media).data,
+                'error': None,
+            })
+
+            return Response(serializer.data)
+
+        queryset = self.filter_queryset(self.get_queryset())
+
+        page = self.paginate_queryset(queryset)
+
+        serializer = ResponseSerializer({
+            'code': 200,
+            'status': 'success',
+            'recordsTotal': queryset.count(),
+            'data': DetailNewsMediaSerializer(page, many=True).data,
+            'error': None,
+        })
+
+        return Response(serializer.data)
+
+class PublicDetailNewsMediaViewSet(viewsets.ModelViewSet):
+    queryset = DetailNewsMedia.objects.all()
+    serializer_class = DetailNewsMediaSerializer
+    permission_classes = [AllowAny]
+    filterset_fields = ['title', 'created_at', 'updated_at']
+    filter_backends = [DjangoFilterBackend, KeywordOrderingFilter]
+    filterset_class = NewsMediaFilter
+    ordering_fields = ['created_at', 'updated_at']
+    ordering = ['created_at']
+    pagination_class = GenericPaginator
+    authentication_classes = []
 
     def list(self, request, *args, **kwargs):
         if request.query_params.get('id'):
