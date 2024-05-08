@@ -40,7 +40,7 @@ urlpatterns = [
         path('/v1', include([
             path('/cms', include([
                 path('/users', include(userv1_cms_urls)),
-                path('/settings', include(settingv1_cms_urls)),
+                path('/', include(settingv1_cms_urls)),
                 path('/news', include(cms_news_v1_urls)),
                 path('/projects', include(projectv1_cms_urls)),
                 path('/awards', include(awardv1_cms_urls)),
@@ -48,7 +48,7 @@ urlpatterns = [
             ])),
             path('/users', include(userv1_urls)),
             path('/auth', include(authv1_urls)),
-            path('/settings', include(settingv1_public_urls)),
+            path('/', include(settingv1_public_urls)),
             path('/news', include(public_news_v1_urls)),
             path('/projects', include(projectv1_public_urls)),
             path('/awards', include(awardv1_public_urls)),
