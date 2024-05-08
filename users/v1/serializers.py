@@ -249,7 +249,6 @@ class UserSerializer(serializers.ModelSerializer):
     def get_division(self, obj):
         return obj.division_id
 
-
 class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
@@ -265,8 +264,6 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
         return response
     
-
-
 class DivisionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Division

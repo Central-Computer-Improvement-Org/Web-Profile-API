@@ -361,13 +361,6 @@ class CMSRoleViewSet(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         super(CMSRoleViewSet, self).create(request, *args, **kwargs)
 
-        serializer = RoleSerializer(data=request.data, context={'request': request})
-
-        if not serializer.is_valid():
-            raise ValidationError(serializer.errors)
-
-        serializer.save()
-
         serializer = ResponseSerializer({
             'code': 201,
             'status': 'success',
@@ -378,7 +371,7 @@ class CMSRoleViewSet(viewsets.ModelViewSet):
             'error': None,
         })
 
-        return Response(serializer.data, status=201)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def update(self, request, *args, **kwargs):
         id = request.query_params.get('id', None)
@@ -397,7 +390,7 @@ class CMSRoleViewSet(viewsets.ModelViewSet):
             serializers.save()
 
             resp = ResponseSerializer({
-                'code': 204,
+                'code': 200,
                 'status': 'success',
                 'recordsTotal': 1,
                 'data': {
@@ -406,7 +399,7 @@ class CMSRoleViewSet(viewsets.ModelViewSet):
                 'error': None,
             })
 
-            return Response(resp.data, status=status.HTTP_204_NO_CONTENT)
+            return Response(resp.data)
 
         except Role.DoesNotExist:
             raise NotFound('Project does not exist!')
@@ -423,7 +416,7 @@ class CMSRoleViewSet(viewsets.ModelViewSet):
             self.perform_destroy(role)
 
             resp = ResponseSerializer({
-                'code': 204,
+                'code': 200,
                 'status': 'success',
                 'recordsTotal': 0,
                 'data': {
@@ -432,7 +425,7 @@ class CMSRoleViewSet(viewsets.ModelViewSet):
                 'error': None,
             })
 
-            return Response(resp.data, status=status.HTTP_204_NO_CONTENT)
+            return Response(resp.data)
 
         except Role.DoesNotExist:
             raise NotFound('Role does not exist!')
