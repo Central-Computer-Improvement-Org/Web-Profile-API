@@ -262,6 +262,26 @@ class CMSDivisionViewSet(viewsets.ModelViewSet):
 
         return Response(serializer.data)
 
+    def create(self, request, *args, **kwargs):
+        serializer = DivisionSerializer(data=request.data, context={'request': request})
+
+        if not serializer.is_valid():
+            raise ValidationError(serializer.errors)
+
+        serializer.save()
+
+        serializer = ResponseSerializer({
+            'code': 200,
+            'status': 'success',
+            'recordsTotal': 1,
+            'data': {
+                "message": "Create division success",
+            },
+            'error': None,
+        })
+
+        return Response(serializer.data)
+
 
 class PublicDivisionViewSet(viewsets.ModelViewSet):
     serializer_class = DivisionSerializer
@@ -339,7 +359,14 @@ class CMSRoleViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
     def create(self, request, *args, **kwargs):
-        role = super(CMSRoleViewSet, self).create(request, *args, **kwargs)
+        super(CMSRoleViewSet, self).create(request, *args, **kwargs)
+
+        serializer = RoleSerializer(data=request.data, context={'request': request})
+
+        if not serializer.is_valid():
+            raise ValidationError(serializer.errors)
+
+        serializer.save()
 
         serializer = ResponseSerializer({
             'code': 201,
