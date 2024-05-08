@@ -7,7 +7,7 @@ from rest_framework.permissions import AllowAny
 
 from settings.v1.filtersets import ContactFilter, ContactSearchFilter
 
-from auth.auth import IsSuperUser
+from auth.auth import IsNotMember
 from common.orderings import KeywordOrderingFilter
 from common.pagination import GenericPaginator
 
@@ -21,7 +21,7 @@ from copy import deepcopy
 
 class CMSSettingViewSet(viewsets.ModelViewSet):
     serializer_class = SettingSerializer
-    permission_classes = [IsSuperUser]
+    permission_classes = [IsNotMember]
     
     def update(self, request, *args, **kwargs):
         setting = Setting.objects.first()
@@ -103,7 +103,7 @@ class PublicSettingViewSet(viewsets.ModelViewSet):
 class CMSContactViewSet(viewsets.ModelViewSet):
     queryset = Contact.objects.all()
     serializer_class = ContactSerializer
-    permission_classes = [IsSuperUser]
+    permission_classes = [IsNotMember]
     filterset_class = ContactFilter
     filter_backends = [DjangoFilterBackend, KeywordOrderingFilter, ContactSearchFilter]
     ordering_fields = ['created_at', 'updated_at']

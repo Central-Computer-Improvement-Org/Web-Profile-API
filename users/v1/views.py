@@ -12,7 +12,7 @@ from rest_framework.serializers import ListSerializer
 import common.orderings
 
 from generic_serializers.serializers import ResponseSerializer, GenericErrorSerializer
-from auth.auth import IsSuperUser, IsPengurus
+from auth.auth import IsNotMember
 from . import filtersets
 
 from common.orderings import KeywordOrderingFilter
@@ -93,7 +93,7 @@ class PublicUserViewSet(viewsets.ModelViewSet):
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
-    permission_classes = [IsPengurus]
+    permission_classes = [IsNotMember]
     authentication_classes = [JWTAuthentication]
     filter_backends = [filtersets.UserSearchFilter, django_filters.rest_framework.DjangoFilterBackend,
                        common.orderings.KeywordOrderingFilter]
@@ -182,7 +182,7 @@ class UserViewSet(viewsets.ModelViewSet):
 class CMSDivisionViewSet(viewsets.ModelViewSet):
     queryset = Division.objects.all()
     serializer_class = DivisionSerializer
-    permission_classes = [IsPengurus]
+    permission_classes = [IsNotMember]
     authentication_classes = [JWTAuthentication]
     filter_backends = [django_filters.rest_framework.DjangoFilterBackend, common.orderings.KeywordOrderingFilter]
     ordering_fields = ['name', 'description', 'createdAt', 'updatedAt']
@@ -300,7 +300,7 @@ class PublicDivisionViewSet(viewsets.ModelViewSet):
 
 class CMSRoleViewSet(viewsets.ModelViewSet):
     serializer_class = RoleSerializer
-    permission_classes = [IsSuperUser]
+    permission_classes = [IsNotMember]
     authentication_classes = [JWTAuthentication]
 
     queryset = Role.objects.all()
