@@ -20,6 +20,10 @@ class UserFilterSet(django_filters.FilterSet):
     isActive = django_filters.BooleanFilter(field_name='active')
     role = django_filters.CharFilter(field_name='role_id', lookup_expr='exact')
     division = django_filters.CharFilter(field_name='division_id', lookup_expr='exact')
+    roleName = django_filters.CharFilter(field_name='role_id__name', lookup_expr='icontains')
+    divisionName = django_filters.CharFilter(field_name='division_id__name', lookup_expr='icontains')
+    roleNameExact = django_filters.CharFilter(field_name='role_id__name', lookup_expr='exact')
+    divisionNameExact = django_filters.CharFilter(field_name='division_id__name', lookup_expr='exact')
 
     def filter_yearUniversityEnrolled(self, queryset, name, value):
         start_date = datetime.strptime(value, "%d-%m-%Y")
