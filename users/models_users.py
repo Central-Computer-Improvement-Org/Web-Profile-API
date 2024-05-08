@@ -41,7 +41,7 @@ class User(AbstractBaseUser):
         return self.role_id.name == "Pengurus" or self.role_id.name == "Superadmin"
 
     def is_member(self):
-        return self.role_id.name == "Member" or self.role_id.name == "Pengurus" or self.role_id.name == "Superadmin"
+        return self.role_id.name == "Member"
 
     def is_active(self):
         return self.active
