@@ -16,9 +16,6 @@ from generic_serializers.serializers import ResponseSerializer
 from .serializers import SettingSerializer, ContactSerializer
 from ..models import Setting, Contact
 
-
-from copy import deepcopy
-
 class CMSSettingViewSet(viewsets.ModelViewSet):
     serializer_class = SettingSerializer
     permission_classes = [IsNotMember]
@@ -140,13 +137,7 @@ class CMSContactViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
     def create(self, request, *args, **kwargs):
-        data = request.data.copy()
-        serializer = self.get_serializer(data=data)
-
-        if not serializer.is_valid():
-            raise ValidationError(serializer.errors)
-        
-        self.perform_create(serializer)
+        super(CMSContactViewSet, self).create(request, *args, **kwargs)
         
         resp = ResponseSerializer({
             'code': 201,
@@ -162,20 +153,18 @@ class CMSContactViewSet(viewsets.ModelViewSet):
     
     def update(self, request, *args, **kwargs):
         id = request.query_params.get('id', None)
-        data = deepcopy(request.data)
 
         if id is None:
             raise ValueError('ID is required')
         
         try:
-            contact = Contact.objects.get(id=id)
-            data = request.data.copy()
-            serializer = self.get_serializer(contact, data=data, partial=True)
+            contact = Contact.objects.get(id=request.query_params['id'])
+            serializer = self.get_serializer(instance=contact, data=request.data, partial=True, context={'request': request})
 
             if not serializer.is_valid():
                 raise ValidationError(serializer.errors)
             
-            self.perform_update(serializer)
+            serializer.save()
                     
             resp = ResponseSerializer({
                 'code': 200,

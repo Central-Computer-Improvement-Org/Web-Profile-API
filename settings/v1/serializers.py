@@ -93,10 +93,10 @@ class ContactSerializer(serializers.ModelSerializer):
         fields = [
             'id',
             'platform',
+            'account_uri',
             'icon_uri',
-            'value',
-            'visited_count',
             'is_active',
+            'value',
             'created_at',
             'updated_at',
             'created_by',
@@ -105,7 +105,6 @@ class ContactSerializer(serializers.ModelSerializer):
 
         read_only_fields = [
             'id',
-            'visited_count',
             'created_at',
             'updated_at',
             'created_by',
@@ -114,8 +113,8 @@ class ContactSerializer(serializers.ModelSerializer):
 
         required_fields = [
             'platform',
+            'account_uri',
             'icon_uri',
-            'value',
         ]
 
     def to_representation(self, instance):
@@ -124,9 +123,9 @@ class ContactSerializer(serializers.ModelSerializer):
 
         response['id'] = response.pop('id')
         response['platform'] = response.pop('platform')
+        response['accountUri'] = response.pop('account_uri')
         response['iconUri'] = response.pop('icon_uri')
         response['value'] = response.pop('value')
-        response['visitedCount'] = response.pop('visited_count')
         response['isActive'] = response.pop('is_active')
         response['createdAt'] = response.pop('created_at')
         response['updatedAt'] = response.pop('updated_at')
@@ -136,39 +135,42 @@ class ContactSerializer(serializers.ModelSerializer):
         return response
     
     def to_internal_value(self, data):
-        data['platform'] = data.get('platform', self.instance.platform if self.instance else None)
-        data['value'] = data.get('value', self.instance.value if self.instance else None)
-        data['is_active'] = data.get('isActive', self.instance.is_active if self.instance else False)
-        data['visited_count'] = data.get('visitedCount', self.instance.visited_count if self.instance else None)
+        new_data = copy.deepcopy(data)
 
-        if 'iconUri' in data :
-            data['icon_uri'] = data.get('iconUri')
+        if 'accountUri' in data:
+            new_data['account_uri'] = data.get('accountUri', None)
 
-        return super().to_internal_value(data)
+        if 'isActive' in data:
+            new_data['is_active'] = data.get('isActive', None)
+
+        if 'iconUri' in data:
+            new_data['icon_uri'] = data.get('iconUri', None)
+            new_data['icon_uri'] = rename_image_file(new_data['icon_uri'], prefix="CNT")
+
+        return super().to_internal_value(new_data)
 
     def create(self, validated_data):
+        if validated_data['icon_uri'] is None:
+            raise ValueError('Icon URI is required')
+
         validated_data['id'] = id_generator(prefix="CNT")
 
         validated_data['created_by'] = self.context['request'].user.nim
         validated_data['updated_by'] = self.context['request'].user.nim
 
-        if 'icon_uri' in validated_data and validated_data['icon_uri']:
-            validated_data['icon_uri'] = rename_image_file(validated_data['icon_uri'], prefix="CNT")
-
-        return super().create(validated_data)
+        return super(ContactSerializer, self).create(validated_data)
 
     
     def update(self, instance, validated_data):
+        if 'icon_uri' in validated_data:
+            old_icon_uri = instance.icon_uri.path if instance.icon_uri else None
+            validated_data['icon_uri'] = rename_image_file(validated_data['icon_uri'], prefix="PJTIC")
+
+            delete_old_file(old_icon_uri)
+
         validated_data['updated_by'] = self.context['request'].user.nim
 
-        if 'icon_uri' in validated_data and validated_data['icon_uri']:
-            old_icon_uri = instance.icon_uri.path if instance.icon_uri else None
-            validated_data['icon_uri'] = rename_image_file(validated_data['icon_uri'], prefix="CNT")
-
-            if old_icon_uri:
-                delete_old_file(old_icon_uri)
-
-        return super().update(instance, validated_data)
+        return super(ContactSerializer, self).update(instance, validated_data)
     
     def delete_icon_uri(self, instance):
         old_icon_uri = str(instance.icon_uri) if instance.icon_uri else None
