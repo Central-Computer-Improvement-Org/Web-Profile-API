@@ -19,11 +19,11 @@ class RoleSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
         required_fields = [
-            'id',
             'name',
         ]
 
         read_only_fields = [
+            'id',
             'created_at',
             'updated_at',
             'created_by',
@@ -31,6 +31,8 @@ class RoleSerializer(serializers.ModelSerializer):
         ]
 
     def create(self, validated_data):
+        validated_data['id'] = id_generator(prefix="RLE")
+        
         if self.context['request'].user.is_authenticated:
             validated_data['created_by'] = self.context['request'].user.nim
             validated_data['updated_by'] = self.context['request'].user.nim
