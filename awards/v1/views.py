@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError, NotFound
 from rest_framework.permissions import AllowAny, IsAuthenticated
 
-from auth.auth import IsPengurus
+from auth.auth import IsNotMember
 
 from common.orderings import KeywordOrderingFilter
 from common.utils import id_generator
@@ -22,12 +22,14 @@ from generic_serializers.serializers import ResponseSerializer
 from .serializers import AwardSerializer, DetailContributorAwardSerializer
 from ..models import Award, DetailContributorAward
 
+import json
+
 class CMSAwardViewSet(viewsets.ModelViewSet):
     award_queryset = Award.objects.all()
     contributor_queryset = DetailContributorAward.objects.all()
     award_serializer_class = AwardSerializer
     contributor_serializer_class = DetailContributorAwardSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsNotMember]
     filterset_class = AwardFilter
     filter_backends = [DjangoFilterBackend, KeywordOrderingFilter, AwardSearchFilter]
     ordering_fields = ['created_at', 'updated_at']
@@ -75,9 +77,13 @@ class CMSAwardViewSet(viewsets.ModelViewSet):
         serializerAward = super(CMSAwardViewSet, self).create(request, *args, **kwargs)
         award_instance = serializerAward.data
 
-        members = request.data.getlist('contributors')
+        members = request.data.get('contributors')
+        members_arr = []
 
-        if members is not None:
+        if members is not None and members is not '':
+            members_arr = json.loads(members)
+        
+        if isinstance(members_arr, list) and len(members_arr) > 0:
             for member in members:
                 detail_contributor_data = {
                     'member_nim': member,

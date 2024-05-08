@@ -9,7 +9,7 @@ from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
-from auth.auth import IsPengurus
+from auth.auth import IsNotMember
 from common.orderings import KeywordOrderingFilter
 from common.pagination import GenericPaginator
 from common.utils import rename_image_file
@@ -23,7 +23,7 @@ from news.v1.serializers import NewsSerializer, DetailNewsMediaSerializer
 class CMSNewsViewSet(viewsets.ModelViewSet):
     queryset = News.objects.all()
     serializer_class = NewsSerializer
-    permission_classes = [IsPengurus]
+    permission_classes = [IsNotMember]
     filter_backends = [DjangoFilterBackend, KeywordOrderingFilter, NewsSearchFilter]
     filterset_class = NewsFilter
     ordering_fields = ['created_at', 'updated_at']
@@ -163,7 +163,7 @@ class PublicNewsViewSet(viewsets.ModelViewSet):
 class CMSDetailNewsMediaViewSet(viewsets.ModelViewSet):
     queryset = DetailNewsMedia.objects.all()
     serializer_class = DetailNewsMediaSerializer
-    permission_classes = [IsPengurus]
+    permission_classes = [IsNotMember]
     filterset_fields = ['title', 'created_at', 'updated_at']
     filter_backends = [DjangoFilterBackend, KeywordOrderingFilter]
     filterset_class = NewsMediaFilter

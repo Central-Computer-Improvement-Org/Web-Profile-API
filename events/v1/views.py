@@ -8,7 +8,7 @@ from rest_framework.response import Response
 import common.orderings
 import common.pagination
 
-from auth.auth import IsPengurus
+from auth.auth import IsNotMember
 from events.models import Event
 from events.v1 import filtersets
 from events.v1.serializers import EventSerializer
@@ -18,7 +18,7 @@ from generic_serializers.serializers import ResponseSerializer
 class CMSEventViewSet(viewsets.ModelViewSet):
     queryset = Event.objects.all()
     serializer_class = EventSerializer
-    permission_classes = [IsPengurus]
+    permission_classes = [IsNotMember]
     filter_backends = [filtersets.EventSearchFilter, django_filters.rest_framework.DjangoFilterBackend, common.orderings.KeywordOrderingFilter]
     filterset_class = filtersets.EventFilterSet
     ordering_fields = ['id', 'name', 'createdAt', 'updatedAt', 'isActive']
