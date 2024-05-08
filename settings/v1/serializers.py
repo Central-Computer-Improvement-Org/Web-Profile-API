@@ -16,6 +16,7 @@ class SettingSerializer(serializers.ModelSerializer):
             'description',
             'logo_uri',
             'title_website',
+            'visited_count',
             'keyword',
             'created_at',
             'updated_at',
@@ -39,6 +40,40 @@ class SettingSerializer(serializers.ModelSerializer):
             'title_website',
             'keyword',
         ]
+
+    def to_representation(self, instance):
+        response = super().to_representation(instance)
+        # rename all field to camelCase
+
+        response['id'] = response.pop('id')
+        response['name'] = response.pop('name')
+        response['address'] = response.pop('address')
+        response['description'] = response.pop('description')
+        response['logoUri'] = response.pop('logo_uri')
+        response['titleWebsite'] = response.pop('title_website')
+        response['keyword'] = response.pop('keyword')
+        response['visitedCount'] = response.pop('visited_count')
+        response['createdAt'] = response.pop('created_at')
+        response['updatedAt'] = response.pop('updated_at')
+        response['createdBy'] = response.pop('created_by')
+        response['updatedBy'] = response.pop('updated_by')
+
+        return response
+
+    def to_internal_value(self, data):
+        new_data = copy.deepcopy(data)
+
+        if 'visitedCount' in data:
+            new_data['visited_count'] = data.get('visitedCount', None)
+
+        if 'titleWebsite' in data:
+            new_data['title_website'] = data.get('titleWebsite', None)
+
+        if 'logoUri' in data :
+            new_data['logo_uri'] = data.get('logoUri')
+            new_data['logo_uri'] = rename_image_file(new_data['logo_uri'], prefix="STG")
+
+        return super().to_internal_value(new_data)
     
     def update(self, instance, validated_data):
         if self.context['request'].user.is_authenticated:
@@ -54,37 +89,6 @@ class SettingSerializer(serializers.ModelSerializer):
                 delete_old_file(old_logo_uri)
 
         return super(SettingSerializer, self).update(instance, validated_data)
-
-
-    def to_representation(self, instance):
-        response = super().to_representation(instance)
-        # rename all field to camelCase
-
-        response['id'] = response.pop('id')
-        response['name'] = response.pop('name')
-        response['address'] = response.pop('address')
-        response['description'] = response.pop('description')
-        response['logoUri'] = response.pop('logo_uri')
-        response['titleWebsite'] = response.pop('title_website')
-        response['keyword'] = response.pop('keyword')
-        response['createdAt'] = response.pop('created_at')
-        response['updatedAt'] = response.pop('updated_at')
-        response['createdBy'] = response.pop('created_by')
-        response['updatedBy'] = response.pop('updated_by')
-
-        return response
-
-    def to_internal_value(self, data):
-        new_data = copy.deepcopy(data)
-
-        if 'titleWebsite' in data:
-            new_data['title_website'] = data.get('titleWebsite', None)
-
-        if 'logoUri' in data :
-            new_data['logo_uri'] = data.get('logoUri')
-            new_data['logo_uri'] = rename_image_file(new_data['logo_uri'], prefix="STG")
-
-        return super().to_internal_value(new_data)
     
 
 class ContactSerializer(serializers.ModelSerializer):

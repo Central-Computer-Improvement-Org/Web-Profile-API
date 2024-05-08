@@ -6,7 +6,7 @@ class Setting(models.Model):
     name = models.CharField(max_length=255)
     address = models.TextField()
     description = models.TextField(max_length=255)
-
+    visited_count = models.IntegerField()
     logo_uri = models.ImageField(upload_to='uploads/setting/')
     title_website = models.CharField(max_length=255)
     keyword = models.TextField()
