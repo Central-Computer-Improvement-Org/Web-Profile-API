@@ -267,7 +267,7 @@ class CMSDetailNewsMediaViewSet(viewsets.ModelViewSet):
 
     def list(self, request, *args, **kwargs):
         if request.query_params.get('id'):
-            detail_news_media = DetailNewsMedia.objects.get(id=request.query)
+            detail_news_media = DetailNewsMedia.objects.get(id=request.query_params.get('id'))
             serializer = ResponseSerializer({
                 'code': 200,
                 'status': 'success',
@@ -306,7 +306,7 @@ class PublicDetailNewsMediaViewSet(viewsets.ModelViewSet):
 
     def list(self, request, *args, **kwargs):
         if request.query_params.get('id'):
-            detail_news_media = DetailNewsMedia.objects.get(id=request.query)
+            detail_news_media = DetailNewsMedia.objects.get(id=request.query_params.get('id'))
             serializer = ResponseSerializer({
                 'code': 200,
                 'status': 'success',
