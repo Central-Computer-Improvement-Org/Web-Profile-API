@@ -18,6 +18,7 @@ class ProjectFilter(django_filters.FilterSet):
     endDate = django_filters.CharFilter(method='filter_endDate')
     name = django_filters.CharFilter(field_name='name', lookup_expr='icontains')
     budget = django_filters.NumberFilter(field_name='budget')
+    divisionId = django_filters.CharFilter(field_name='division_id')
 
     dateField_value = "created_at"
 
