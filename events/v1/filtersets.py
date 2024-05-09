@@ -15,10 +15,14 @@ class EventSearchFilter(filters.BaseFilterBackend):
 
 
 class EventFilterSet(django_filters.FilterSet):
+    name = django_filters.CharFilter(field_name='name', lookup_expr='icontains')
     dateField = django_filters.CharFilter(method='filter_dateField')
     startDate = django_filters.CharFilter(method='filter_startDate')
     endDate = django_filters.CharFilter(method='filter_endDate')
     heldOn = django_filters.CharFilter(field_name='held_on')
+    budget = django_filters.NumberFilter(field_name='budget')
+    budgetStart = django_filters.NumberFilter(field_name='budget', lookup_expr='gte')
+    budgetEnd = django_filters.NumberFilter(field_name='budget', lookup_expr='lte')
     isActive = django_filters.BooleanFilter(field_name='is_active')
     division = django_filters.CharFilter(field_name='division_id')
     divisionName = django_filters.CharFilter(field_name='division_id__name')
