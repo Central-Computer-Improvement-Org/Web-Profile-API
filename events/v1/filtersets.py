@@ -20,6 +20,8 @@ class EventFilterSet(django_filters.FilterSet):
     endDate = django_filters.CharFilter(method='filter_endDate')
     heldOn = django_filters.CharFilter(field_name='held_on')
     isActive = django_filters.BooleanFilter(field_name='is_active')
+    division = django_filters.CharFilter(field_name='division_id')
+    divisionName = django_filters.CharFilter(field_name='division_id__name')
 
     dateField_value = "created_at"
 
