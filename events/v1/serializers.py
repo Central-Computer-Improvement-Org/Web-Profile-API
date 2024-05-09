@@ -23,7 +23,7 @@ class EventSerializer(serializers.ModelSerializer):
         ]
 
         required_fields = [
-            'title',
+            'name',
             'description',
             'is_active',
         ]
