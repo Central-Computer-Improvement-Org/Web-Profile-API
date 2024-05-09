@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from ..models import Project, DetailContributorProject
+from ..models import Project, DetailContributorProject, DetailDivisionProject
 
 from users.v1.serializers import UserSerializer, DivisionSerializer
 
@@ -70,10 +70,73 @@ class DetailContributorProjectSerializer(serializers.ModelSerializer):
         validated_data['updated_by'] = self.context['request'].user.nim
 
         return super(DetailContributorProjectSerializer, self).update(instance, validated_data)
+    
+
+class DetailDivisionProjectSerializer(serializers.ModelSerializer):
+    division = DivisionSerializer(source='division_id', read_only=True)
+
+    class Meta:
+        model = DetailDivisionProject
+        fields = [
+            'id',
+            'division_id',
+            'project_id',
+            'created_at',
+            'updated_at',
+            'created_by',
+            'updated_by',
+            'division'
+        ]
+
+        read_only_fields = [
+            'id',
+            'created_at',
+            'updated_at',
+            'created_by',
+            'updated_by',
+        ]
+
+        required_fields = [
+            'division_id',
+            'project_id',
+        ]
+
+    def to_representation(self, instance):
+        response = super().to_representation(instance)
+        # rename all field to camelCase
+
+        division_data = response.pop('division')
+        response.update(division_data)
+
+        response.pop('project_id', None)
+        response.pop('division_id', None)
+        response.pop('created_at', None)
+        response.pop('updated_at', None)
+        response.pop('created_by', None)
+        response.pop('updated_by', None)
+        
+        return response
+    
+    def to_internal_value(self, data):
+
+        return super().to_internal_value(data)
+    
+    def create(self, validated_data):
+        validated_data['id'] = id_generator(prefix="DDP")
+
+        validated_data['created_by'] = self.context['request'].user.nim
+        validated_data['updated_by'] = self.context['request'].user.nim
+
+        return super(DetailDivisionProjectSerializer, self).create(validated_data)
+    
+    def update(self, instance, validated_data):
+        validated_data['updated_by'] = self.context['request'].user.nim
+
+        return super(DetailDivisionProjectSerializer, self).update(instance, validated_data)
 
 class ProjectSerializer(serializers.ModelSerializer):
     contributors = DetailContributorProjectSerializer(many=True, read_only=True)
-    division = DivisionSerializer(source='division_id', read_only=True)
+    divisions = DetailDivisionProjectSerializer(many=True, read_only=True)
 
     class Meta:
         model = Project
@@ -86,13 +149,12 @@ class ProjectSerializer(serializers.ModelSerializer):
             'image_uri',
             'icon_uri',
             'budget',
-            'division_id',
             'created_at',
             'updated_at',
             'created_by',
             'updated_by',
             'contributors',
-            'division',
+            'divisions',
         ]
 
         read_only_fields = [
@@ -120,21 +182,17 @@ class ProjectSerializer(serializers.ModelSerializer):
         response['imageUri'] = response.pop('image_uri')
         response['iconUri'] = response.pop('icon_uri')
         response['budget'] = response.pop('budget')
-        response['division'] = response.pop('division')
+        response['divisions'] = response.pop('divisions')
         response['contributors'] = response.pop('contributors')
         response['createdAt'] = response.pop('created_at')
         response['updatedAt'] = response.pop('updated_at')
         response['createdBy'] = response.pop('created_by')
         response['updatedBy'] = response.pop('updated_by')
-        response.pop('division_id', None)
 
         return response
     
     def to_internal_value(self, data):
         new_data = copy.deepcopy(data)
-
-        if 'divisionId' in data:
-            new_data['division_id'] = data.get('divisionId', None)
         
         if 'productionUri' in data:
             new_data['production_uri'] = data.get('productionUri', None)

@@ -1,9 +1,11 @@
 from datetime import datetime
 from rest_framework import filters
+from django.forms import ModelMultipleChoiceField
 
 import django_filters
 
 from ..models import Project
+from users.models import Division
 
 class ProjectSearchFilter(filters.BaseFilterBackend):
     def filter_queryset(self, request, queryset, view):
@@ -18,7 +20,7 @@ class ProjectFilter(django_filters.FilterSet):
     endDate = django_filters.CharFilter(method='filter_endDate')
     name = django_filters.CharFilter(field_name='name', lookup_expr='icontains')
     budget = django_filters.NumberFilter(field_name='budget')
-    divisionId = django_filters.CharFilter(field_name='division_id')
+    divisionId = django_filters.ModelMultipleChoiceFilter(queryset=Division.objects.all(), field_name='divisions__division_id', to_field_name='id')
 
     dateField_value = "created_at"
 

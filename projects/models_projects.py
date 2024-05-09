@@ -17,7 +17,6 @@ class Project(models.Model):
     image_uri = models.ImageField(upload_to="uploads/projects/thumbnails/", validators=[validate_image_size])
     icon_uri = models.ImageField(upload_to="uploads/projects/icons/", validators=[validate_image_size])
     budget = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, validators=[MinValueValidator(0)])
-    division_id = models.ForeignKey(Division, related_name='projects', on_delete=models.SET_NULL, null=True)
 
     created_at = models.DateTimeField(auto_now_add=True, null=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)

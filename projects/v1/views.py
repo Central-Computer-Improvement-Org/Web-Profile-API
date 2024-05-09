@@ -14,7 +14,7 @@ from projects.v1.filtersets import ProjectFilter, ProjectSearchFilter
 
 from generic_serializers.serializers import ResponseSerializer
 
-from .serializers import ProjectSerializer, DetailContributorProjectSerializer
+from .serializers import ProjectSerializer, DetailContributorProjectSerializer, DetailDivisionProjectSerializer
 from ..models import Project, DetailContributorProject
 
 import json
@@ -24,6 +24,7 @@ class CMSProjectViewSet(viewsets.ModelViewSet):
     contributor_queryset = DetailContributorProject.objects.all()
     project_serializer_class = ProjectSerializer
     contributor_serializer_class = DetailContributorProjectSerializer
+    division_serializer_class = DetailDivisionProjectSerializer
     permission_classes = [IsNotMember]
     filterset_class = ProjectFilter
     filter_backends = [DjangoFilterBackend, KeywordOrderingFilter, ProjectSearchFilter]
@@ -42,6 +43,21 @@ class CMSProjectViewSet(viewsets.ModelViewSet):
 
     def list(self, request, *args, **kwargs):
         if request.query_params.get('id'):
+            if request.query_params.get('contributorsOnly') == "true":
+                contributors = DetailContributorProject.objects.filter(project_id=request.query_params.get('id'))
+
+                page = self.paginate_queryset(contributors)
+
+                serializer = ResponseSerializer({
+                    'code': 200,
+                    'status': 'success',
+                    'recordsTotal': contributors.count(),
+                    'data': DetailContributorProjectSerializer(page, many=True).data,
+                    'error': None,
+                })
+
+                return Response(serializer.data)
+            
             project = Project.objects.get(id=request.query_params.get('id'))
 
             serializer = ResponseSerializer({
@@ -54,7 +70,7 @@ class CMSProjectViewSet(viewsets.ModelViewSet):
 
             return Response(serializer.data)
 
-        queryset = self.filter_queryset(self.get_queryset().prefetch_related('contributors'))
+        queryset = self.filter_queryset(self.get_queryset().prefetch_related('contributors', 'divisions'))
 
         page = self.paginate_queryset(queryset)
 
@@ -73,8 +89,25 @@ class CMSProjectViewSet(viewsets.ModelViewSet):
         project_instance = serializerProject.data
 
         members = request.data.get('contributors')
+        divisions = request.data.get('divisions')
 
         members_arr = []
+        divisions_arr = []
+
+        if divisions is not None and divisions is not '':
+            divisions_arr = json.loads(divisions)
+
+        if isinstance(divisions_arr, list) and len(divisions_arr) > 0:
+            for division in divisions_arr:
+                detail_division_data = {
+                    'division_id': division,
+                    'project_id': project_instance['id'],  
+                }
+
+                detail_division_serializer = DetailDivisionProjectSerializer(data=detail_division_data, context=self.get_serializer_context())
+
+                if detail_division_serializer.is_valid():
+                    detail_division_serializer.save()
 
         if members is not None and members is not '':
             members_arr = json.loads(members)
