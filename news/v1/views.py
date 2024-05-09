@@ -1,3 +1,5 @@
+import copy
+import json
 from datetime import datetime
 
 from django.utils import timezone
@@ -14,7 +16,7 @@ from common.orderings import KeywordOrderingFilter
 from common.pagination import GenericPaginator
 from common.utils import rename_image_file
 from generic_serializers.serializers import ResponseSerializer
-from news.detail_news_media import DetailNewsMedia
+from news.detail_news_media_models import DetailNewsMedia
 from news.news_models import News
 from news.v1.filtersets import NewsFilter, NewsMediaFilter, NewsSearchFilter
 from news.v1.serializers import NewsSerializer, DetailNewsMediaSerializer
@@ -31,7 +33,39 @@ class CMSNewsViewSet(viewsets.ModelViewSet):
     pagination_class = GenericPaginator
 
     def create(self, request, *args, **kwargs):
-        super(CMSNewsViewSet, self).create(request, *args, **kwargs)
+        #super(CMSNewsViewSet, self).create(request, *args, **kwargs)
+
+        news_copy = copy.deepcopy(request.data)
+
+        detail_news_media = None
+
+        if 'detailNewsMedia' in news_copy:
+            detail_news_media = news_copy.pop('detailNewsMedia')
+
+        serializer = self.get_serializer(data=news_copy, context={'request': request})
+
+        if not serializer.is_valid():
+            raise ValidationError(serializer.errors)
+
+        serializer.save()
+
+        if detail_news_media is not None:
+            dnms = []
+
+            for media in detail_news_media:
+                new_dnm = {
+                    'newsId': serializer.data['id'],
+                    'mediaUri': media
+                }
+                dnm_serializer = DetailNewsMediaSerializer(data=new_dnm, context={'request': request})
+
+                if not dnm_serializer.is_valid():
+                    raise ValidationError(dnm_serializer.errors)
+
+                dnms.append(dnm_serializer)
+
+            for dnm in dnms:
+                dnm.save()
 
         serializer = ResponseSerializer({
             'code': 200,

@@ -1,7 +1,7 @@
 from django.test import TestCase
 
 from news.news_models import News
-from news.detail_news_media import DetailNewsMedia
+from news.detail_news_media_models import DetailNewsMedia
 
 
 def _create_news(id, title, description, media_uri):
