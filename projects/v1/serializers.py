@@ -2,7 +2,7 @@ from rest_framework import serializers
 
 from ..models import Project, DetailContributorProject
 
-from users.v1.serializers import UserSerializer
+from users.v1.serializers import UserSerializer, DivisionSerializer
 
 from common.utils import id_generator, rename_image_file, delete_old_file
 
@@ -73,6 +73,7 @@ class DetailContributorProjectSerializer(serializers.ModelSerializer):
 
 class ProjectSerializer(serializers.ModelSerializer):
     contributors = DetailContributorProjectSerializer(many=True, read_only=True)
+    division = DivisionSerializer(source='division_id', read_only=True)
 
     class Meta:
         model = Project
@@ -85,11 +86,13 @@ class ProjectSerializer(serializers.ModelSerializer):
             'image_uri',
             'icon_uri',
             'budget',
+            'division_id',
             'created_at',
             'updated_at',
             'created_by',
             'updated_by',
-            'contributors'
+            'contributors',
+            'division',
         ]
 
         read_only_fields = [
@@ -117,16 +120,21 @@ class ProjectSerializer(serializers.ModelSerializer):
         response['imageUri'] = response.pop('image_uri')
         response['iconUri'] = response.pop('icon_uri')
         response['budget'] = response.pop('budget')
+        response['division'] = response.pop('division')
         response['contributors'] = response.pop('contributors')
         response['createdAt'] = response.pop('created_at')
         response['updatedAt'] = response.pop('updated_at')
         response['createdBy'] = response.pop('created_by')
         response['updatedBy'] = response.pop('updated_by')
+        response.pop('division_id', None)
 
         return response
     
     def to_internal_value(self, data):
         new_data = copy.deepcopy(data)
+
+        if 'divisionId' in data:
+            new_data['division_id'] = data.get('divisionId', None)
         
         if 'productionUri' in data:
             new_data['production_uri'] = data.get('productionUri', None)
