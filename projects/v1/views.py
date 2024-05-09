@@ -197,6 +197,21 @@ class PublicProjectViewSet(viewsets.ModelViewSet):
 
     def list(self, request, *args, **kwargs):
         if request.query_params.get('id'):
+            if request.query_params.get('contributorsOnly') == "true":
+                contributors = DetailContributorProject.objects.filter(project_id=request.query_params.get('id'))
+
+                page = self.paginate_queryset(contributors)
+
+                serializer = ResponseSerializer({
+                    'code': 200,
+                    'status': 'success',
+                    'recordsTotal': contributors.count(),
+                    'data': DetailContributorProjectSerializer(page, many=True).data,
+                    'error': None,
+                })
+
+                return Response(serializer.data)
+            
             project = Project.objects.get(id=request.query_params.get('id'))
 
             serializer = ResponseSerializer({
