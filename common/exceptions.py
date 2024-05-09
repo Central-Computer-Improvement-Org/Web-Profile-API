@@ -15,6 +15,8 @@ from django.db.models import ObjectDoesNotExist
 
 from django.http import Http404
 
+from common.utils import snake_to_camel
+
 
 def jwt_exception_handler(request, exc):
     response = ResponseSerializer({
@@ -43,7 +45,7 @@ def validation_exception_handler(request, exc: ValidationError):
     else:
         for key, value in exc.detail.items():
             val_errors.append(ValidationErrorSerializer({
-                'name': key,
+                'name': snake_to_camel(key),
                 'message': value[0]
             }).data)
 
