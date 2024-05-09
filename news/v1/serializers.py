@@ -92,7 +92,7 @@ class NewsSerializer(serializers.ModelSerializer):
         return super(NewsSerializer, self).update(instance, validated_data)
 
     def get_detail_news_media(self, obj):
-        detail_news_media = DetailNewsMedia.objects.filter(news_id=obj.id).values_list('media_uri', flat=True)
+        detail_news_media = map(lambda x: "/media/" + x, DetailNewsMedia.objects.filter(news_id=obj.id).values_list('media_uri', flat=True))
         return detail_news_media
 
 
