@@ -196,6 +196,7 @@ class CMSDivisionViewSet(viewsets.ModelViewSet):
     permission_classes = [IsNotMember]
     authentication_classes = [JWTAuthentication]
     filter_backends = [django_filters.rest_framework.DjangoFilterBackend, common.orderings.KeywordOrderingFilter]
+    filterset_class = filtersets.DivisionFilterSet
     ordering_fields = ['name', 'description', 'createdAt', 'updatedAt']
     ordering = ['name']
     pagination_class = common.pagination.GenericPaginator
@@ -301,6 +302,7 @@ class PublicDivisionViewSet(viewsets.ModelViewSet):
     filter_backends = [django_filters.rest_framework.DjangoFilterBackend, common.orderings.KeywordOrderingFilter]
     ordering_fields = ['name', 'description', 'createdAt', 'updatedAt']
     ordering = ['name']
+    filterset_class = filtersets.DivisionFilterSet
     authentication_classes = []
 
     def list(self, request, *args, **kwargs):
