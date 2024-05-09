@@ -26,7 +26,7 @@ class CMSNewsViewSet(viewsets.ModelViewSet):
     permission_classes = [IsNotMember]
     filter_backends = [DjangoFilterBackend, KeywordOrderingFilter, NewsSearchFilter]
     filterset_class = NewsFilter
-    ordering_fields = ['created_at', 'updated_at']
+    ordering_fields = ['createdAt', 'updatedAt']
     ordering = ['created_at']
     pagination_class = GenericPaginator
 
@@ -124,7 +124,7 @@ class PublicNewsViewSet(viewsets.ModelViewSet):
     queryset = News.objects.filter(is_published=True)
     filter_backends = [DjangoFilterBackend, KeywordOrderingFilter]
     filterset_class = NewsFilter
-    ordering_fields = ['created_at', 'updated_at']
+    ordering_fields = ['createdAt', 'updatedAt']
     ordering = ['created_at']
     pagination_class = GenericPaginator
     authentication_classes = []
@@ -168,7 +168,7 @@ class CMSDetailNewsMediaViewSet(viewsets.ModelViewSet):
     filterset_fields = ['title', 'created_at', 'updated_at']
     filter_backends = [DjangoFilterBackend, KeywordOrderingFilter]
     filterset_class = NewsMediaFilter
-    ordering_fields = ['created_at', 'updated_at']
+    ordering_fields = ['createdAt', 'updatedAt']
     ordering = ['created_at']
     pagination_class = GenericPaginator
 
@@ -265,7 +265,7 @@ class PublicDetailNewsMediaViewSet(viewsets.ModelViewSet):
     filterset_fields = ['title', 'created_at', 'updated_at']
     filter_backends = [DjangoFilterBackend, KeywordOrderingFilter]
     filterset_class = NewsMediaFilter
-    ordering_fields = ['created_at', 'updated_at']
+    ordering_fields = ['createdAt', 'updatedAt']
     ordering = ['created_at']
     pagination_class = GenericPaginator
     authentication_classes = []
@@ -292,6 +292,32 @@ class PublicDetailNewsMediaViewSet(viewsets.ModelViewSet):
             'status': 'success',
             'recordsTotal': queryset.count(),
             'data': DetailNewsMediaSerializer(page, many=True).data,
+            'error': None,
+        })
+
+        return Response(serializer.data)
+
+
+class UpdateVisitedCount(viewsets.ModelViewSet):
+    queryset = News.objects.all()
+    serializer_class = NewsSerializer
+    permission_classes = [IsNotMember]
+
+    def update(self, request, *args, **kwargs):
+        if request.query_params.get('id') is None:
+            raise ValueError('ID is required')
+
+        news = News.objects.get(id=request.query_params['id'])
+        news.visited_count += 1
+        news.save()
+
+        serializer = ResponseSerializer({
+            'code': 200,
+            'status': 'success',
+            'recordsTotal': 1,
+            'data': {
+                "message": "Updated visited count successfully"
+            },
             'error': None,
         })
 

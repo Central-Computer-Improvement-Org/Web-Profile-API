@@ -1,5 +1,6 @@
 from django.utils import timezone
 from rest_framework import serializers
+from rest_framework.fields import SerializerMethodField
 
 from common.utils import rename_image_file
 from news.detail_news_media import DetailNewsMedia
@@ -9,6 +10,7 @@ import copy
 
 class NewsSerializer(serializers.ModelSerializer):
     media_uri = serializers.ImageField(required=False)
+    detail_news_media = serializers.ListField(child=serializers.CharField(), required=False)
 
     class Meta:
         model = News
@@ -17,6 +19,8 @@ class NewsSerializer(serializers.ModelSerializer):
             'title',
             'description',
             'media_uri',
+            'detail_news_media',
+            'visited_count',
             'created_at',
             'updated_at',
             'created_by',
@@ -26,6 +30,7 @@ class NewsSerializer(serializers.ModelSerializer):
 
         read_only_fields = [
             'id',
+            'detail_news_media',
             'created_at',
             'updated_at',
             'created_by',
@@ -47,6 +52,9 @@ class NewsSerializer(serializers.ModelSerializer):
         if 'isPublished' in data:
             new_data['is_published'] = data.get('isPublished', None)
 
+        if 'visitedCount' in data:
+            new_data['visited_count'] = data.get('visitedCount', None)
+
         return super().to_internal_value(new_data)
 
     def to_representation(self, instance):
@@ -58,6 +66,8 @@ class NewsSerializer(serializers.ModelSerializer):
         response['createdBy'] = response.pop('created_by', None)
         response['updatedBy'] = response.pop('updated_by', None)
         response['isPublished'] = response.pop('is_published', None)
+        response['visitedCount'] = response.pop('visited_count', None)
+        response['detailNewsMedia'] = self.get_detail_news_media(instance)
 
         return response
 
@@ -80,6 +90,10 @@ class NewsSerializer(serializers.ModelSerializer):
         validated_data['updated_by'] = self.context['request'].user.nim
 
         return super(NewsSerializer, self).update(instance, validated_data)
+
+    def get_detail_news_media(self, obj):
+        detail_news_media = DetailNewsMedia.objects.filter(news_id=obj.id).values_list('media_uri', flat=True)
+        return detail_news_media
 
 
 class DetailNewsMediaSerializer(serializers.ModelSerializer):
