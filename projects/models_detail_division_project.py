@@ -1,13 +1,13 @@
 from django.db import models
 
 from projects.models_projects import Project
-from users.models import User
+from users.models import Division
 
-class DetailContributorProject(models.Model):
+class DetailDivisionProject(models.Model):
     id = models.CharField(primary_key=True, max_length=255)
 
-    member_nim = models.ForeignKey(User, related_name='projects', on_delete=models.PROTECT)
-    project_id = models.ForeignKey(Project, related_name='contributors', on_delete=models.PROTECT)
+    division_id = models.ForeignKey(Division, related_name='projects', on_delete=models.PROTECT)
+    project_id = models.ForeignKey(Project, related_name='divisions', on_delete=models.PROTECT)
 
     created_at = models.DateTimeField(auto_now_add=True, null=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)
