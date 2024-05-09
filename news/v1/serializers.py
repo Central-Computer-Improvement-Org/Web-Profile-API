@@ -3,7 +3,7 @@ from rest_framework import serializers
 from rest_framework.fields import SerializerMethodField
 
 from common.utils import rename_image_file
-from news.detail_news_media import DetailNewsMedia
+from news.detail_news_media_models import DetailNewsMedia
 from news.models import News
 
 import copy
@@ -101,8 +101,6 @@ class DetailNewsMediaSerializer(serializers.ModelSerializer):
         model = DetailNewsMedia
         fields = [
             'id',
-            'title',
-            'description',
             'media_uri',
             'news_id',
             'created_at',
@@ -120,8 +118,6 @@ class DetailNewsMediaSerializer(serializers.ModelSerializer):
         ]
 
         required_fields = [
-            'title',
-            'description',
             'media_uri',
             'news_id',
         ]
