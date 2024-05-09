@@ -1,3 +1,5 @@
+import _io
+
 from rest_framework.exceptions import AuthenticationFailed, NotFound, PermissionDenied, MethodNotAllowed, \
     NotAuthenticated, ParseError
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
@@ -60,6 +62,27 @@ def validation_exception_handler(request, exc: ValidationError):
 
 
 def server_error_exception_handler(request, exc):
+    if "_io.BufferedRandom" in exc.__str__():
+        val_errors = [
+            ValidationErrorSerializer({
+                'name': 'media_uri',
+                'message': 'The maximum file size that can be uploaded is 2MB'
+            }).data
+        ]
+
+        response = ResponseSerializer({
+            'code': 400,
+            'status': 'VALIDATION_ERROR',
+            'recordsTotal': 0,
+            'error': GenericErrorSerializer({
+                'name': "ValidationError",
+                'message': 'Invalid input.',
+                'validation': val_errors,
+            }).data
+        })
+
+        return Response(response.data, status=status.HTTP_400_BAD_REQUEST)
+
     response = ResponseSerializer({
         'code': 500,
         'status': 'SERVER_ERROR',
