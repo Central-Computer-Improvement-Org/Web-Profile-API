@@ -72,9 +72,6 @@ class NewsSerializer(serializers.ModelSerializer):
         return response
 
     def create(self, validated_data):
-        if validated_data['media_uri'] is None:
-            raise ValueError('Media URI is required')
-
         validated_data['id'] = f'NWS-{timezone.now().strftime("%Y%m%d%H%M%S%f")}'
 
         validated_data['created_by'] = self.context['request'].user.nim

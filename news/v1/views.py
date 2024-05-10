@@ -42,7 +42,7 @@ class CMSNewsViewSet(viewsets.ModelViewSet):
         if 'detailNewsMedia' in news_copy:
             detail_news_media = news_copy.pop('detailNewsMedia')
 
-        serializer = self.get_serializer(data=news_copy, context={'request': request})
+        serializer = NewsSerializer(data=news_copy, context={'request': request})
 
         if not serializer.is_valid():
             raise ValidationError(serializer.errors)
