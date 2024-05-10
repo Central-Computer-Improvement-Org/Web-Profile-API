@@ -15,7 +15,7 @@ from projects.v1.filtersets import ProjectFilter, ProjectSearchFilter
 from generic_serializers.serializers import ResponseSerializer
 
 from .serializers import ProjectSerializer, DetailContributorProjectSerializer, DetailDivisionProjectSerializer
-from ..models import Project, DetailContributorProject
+from ..models import Project, DetailContributorProject, DetailDivisionProject
 
 import json
 
@@ -153,8 +153,24 @@ class CMSProjectViewSet(viewsets.ModelViewSet):
                 project_serializer.save()
 
                 members = request.data.get('contributors')
+                divisions = request.data.get('divisions')
 
                 members_arr = []
+                divisions_arr = []
+
+                if divisions is not None and divisions is not '':
+                    divisions_arr = json.loads(divisions)
+
+                if isinstance(members_arr, list) and len(members_arr) > 0:
+                    DetailDivisionProject.objects.filter(project_id=id).delete()
+                    for division in divisions_arr:
+                        detail_division_data = {
+                            'division_id': division,
+                            'project_id': id,  
+                        }
+                        detail_division_serializer = DetailDivisionProjectSerializer(data=detail_division_data, context=self.get_serializer_context())
+                        if detail_division_serializer.is_valid():
+                            detail_division_serializer.save()
 
                 if members is not None and members is not '':
                     members_arr = json.loads(members)
@@ -199,6 +215,7 @@ class CMSProjectViewSet(viewsets.ModelViewSet):
             serializer.delete_icon_uri(project)
 
             DetailContributorProject.objects.filter(project_id=id).delete()
+            DetailDivisionProject.objects.filter(project_id=id).delete()
 
             self.perform_destroy(project)
 
