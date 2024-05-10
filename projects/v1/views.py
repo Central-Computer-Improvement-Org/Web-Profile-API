@@ -160,7 +160,6 @@ class CMSProjectViewSet(viewsets.ModelViewSet):
 
                 if divisions is not None and divisions is not '':
                     divisions_arr = json.loads(divisions)
-                    print(divisions_arr)
 
                 if isinstance(divisions_arr, list) and len(divisions_arr) > 0:
                     DetailDivisionProject.objects.filter(project_id=id).delete()
