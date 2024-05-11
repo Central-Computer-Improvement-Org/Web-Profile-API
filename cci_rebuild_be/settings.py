@@ -184,8 +184,8 @@ REST_FRAMEWORK = {
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
     'EXCEPTION_HANDLER': 'common.exceptions.global_exception_handler',
-    'DATETIME_FORMAT': '%d-%m-%Y %H:%M',
-    'DATE_FORMAT': '%d-%m-%Y',
+    'DATETIME_FORMAT': '%Y-%m-%d %H:%M:%s',
+    'DATE_FORMAT': "%Y-%m-%d",
     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend']
 }
 
