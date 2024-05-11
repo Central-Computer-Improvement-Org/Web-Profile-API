@@ -267,7 +267,7 @@ class UserSerializer(serializers.ModelSerializer):
                                                          division_id=update_fields['division_id']).exclude(
                 nim=instance.nim).exists()
 
-            if user_leader_exists or user_sub_leader_exists:
+            if (user_leader_exists or user_sub_leader_exists) and (instance.role_id.name == role_leader.name or instance.role_id.name == role_sub_leader.name):
                 raise ValidationError({
                     'roleId': ['Ketua/Wakil Ketua sudah ada di divisi tersebut.']
                 })
