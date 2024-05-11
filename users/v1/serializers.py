@@ -263,14 +263,16 @@ class UserSerializer(serializers.ModelSerializer):
             user_sub_leader = User.objects.filter(role_id__name=role_sub_leader.name,
                                               division_id=update_fields['division_id'])
 
+            division = Division.objects.get(id=update_fields['division_id'])
+
             if (user.exists() and user.first().nim != instance.nim):
-                if update_fields['role_id'] == role_leader.id:
+                if division.id != instance.division_id.id:
                     raise ValidationError({
                         'roleId': ['Ketua/Wakil Ketua sudah ada di divisi tersebut.']
                     })
 
             if (user_sub_leader.exists() and user_sub_leader.first().nim != instance.nim):
-                if update_fields['role_id'] == role_sub_leader.id:
+                if division.id != instance.division_id.id:
                     raise ValidationError({
                         'roleId': ['Ketua/Wakil Ketua sudah ada di divisi tersebut.']
                     })
