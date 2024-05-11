@@ -258,9 +258,9 @@ class UserSerializer(serializers.ModelSerializer):
 
         if role_leader is not None and role_sub_leader is not None:
             user = User.objects.filter(role_id__name=role_sub_leader.name,
-                                              division_id=update_fields['division_id']).first()
+                                              division_id=update_fields['division_id'])
 
-            if user.exists() and user.nim != instance.nim:
+            if user.exists() and user.first().nim != instance.nim:
                 if update_fields['role_id'] == role_leader.id or update_fields['role_id'] == role_sub_leader.id:
                     raise ValidationError({
                         'roleId': ['Ketua/Wakil Ketua sudah ada di divisi tersebut.']
