@@ -191,14 +191,14 @@ class UserSerializer(serializers.ModelSerializer):
                     })
 
         if user is not None:
-            if user.role_id is not None:
+            if role_id is not None:
                 if user.role_id.name in ['Ketua', 'Wakil Ketua']:
                     if User.objects.filter(role_id=role_id, division_id=division_id).exclude(nim=user.nim).exists():
                         raise ValidationError({
                             "role" : f'Role {role_id.name} already exists in the selected division.'
                         })
 
-            if user.division_id is not None:
+            if division_id is not None:
                 if User.objects.filter(role_id=role_id, division_id=division_id).exclude(nim=user.nim).exists():
                     raise ValidationError({
                         "division" : f'Division {division_id.name} already has a role.'
