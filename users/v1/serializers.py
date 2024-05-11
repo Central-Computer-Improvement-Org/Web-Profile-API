@@ -178,11 +178,31 @@ class UserSerializer(serializers.ModelSerializer):
         role_id = data.get('role_id')
         division_id = data.get('division_id')
 
-        if role_id.name in ['Ketua', 'Wakil Ketua']:
-            if User.objects.filter(role_id=role_id, division_id=division_id).exists():
-                raise ValidationError({
-                    "role" : f'Role {role_id.name} already exists in the selected division.'
-                })
+        try:
+            user = User.objects.get(nim=data.get('nim'))
+        except User.DoesNotExist:
+            user = None
+
+        if user is None:
+            if role_id.name in ['Ketua', 'Wakil Ketua']:
+                if User.objects.filter(role_id=role_id, division_id=division_id).exists():
+                    raise ValidationError({
+                        "role" : f'Role {role_id.name} already exists in the selected division.'
+                    })
+
+        if user is not None:
+            if user.role_id is not None:
+                if user.role_id.name in ['Ketua', 'Wakil Ketua']:
+                    if User.objects.filter(role_id=role_id, division_id=division_id).exclude(nim=user.nim).exists():
+                        raise ValidationError({
+                            "role" : f'Role {role_id.name} already exists in the selected division.'
+                        })
+
+            if user.division_id is not None:
+                if User.objects.filter(role_id=role_id, division_id=division_id).exclude(nim=user.nim).exists():
+                    raise ValidationError({
+                        "division" : f'Division {division_id.name} already has a role.'
+                    })
 
         return data
 
