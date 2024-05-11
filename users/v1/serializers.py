@@ -256,22 +256,26 @@ class UserSerializer(serializers.ModelSerializer):
         if update_fields['division_id'] is None:
             update_fields['division_id'] = instance.division_id.id
 
-        role_leader = Role.objects.get(name='Ketua')
-        role_sub_leader = Role.objects.get(name='Wakil Ketua')
+        role_leader = Role.objects.filter(name='Ketua').first()
+        role_sub_leader = Role.objects.filter(name='Wakil Ketua').first()
 
         if update_fields['role_id'] != role_leader.id and update_fields['role_id'] != role_sub_leader.id:
             return super(UserSerializer, self).update(instance, validated_data)
 
-        if role_leader is not None and role_sub_leader is not None:
-            user_leader_exists = User.objects.filter(role_id__name=role_leader.name,
-                                                     division_id=update_fields['division_id']).exclude(
-                nim=instance.nim).exists()
-            user_sub_leader_exists = User.objects.filter(role_id__name=role_sub_leader.name,
-                                                         division_id=update_fields['division_id']).exclude(
-                nim=instance.nim).exists()
 
-            if user_leader_exists or user_sub_leader_exists:
-                raise serializers.ValidationError("Ketua dan Wakil Ketua tidak boleh lebih dari satu orang dalam satu divisi")
+        if update_fields['role_id'] == role_leader.id:
+            leader = User.objects.filter(role_id=role_leader.id, division_id=update_fields['division_id']).first()
+            if leader is not None and leader.nim != instance.nim:
+                raise serializers.ValidationError({
+                    'roleId': 'Leader already exist in this division'
+                })
+
+        if update_fields['role_id'] == role_sub_leader.id:
+            sub_leader = User.objects.filter(role_id=role_sub_leader.id, division_id=update_fields['division_id']).first()
+            if sub_leader is not None and sub_leader.nim != instance.nim:
+                raise serializers.ValidationError({
+                    'roleId': 'Sub Leader already exist in this division'
+                })
 
         return super(UserSerializer, self).update(instance, validated_data)
 
