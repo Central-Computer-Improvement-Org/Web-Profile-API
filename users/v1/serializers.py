@@ -171,41 +171,6 @@ class UserSerializer(serializers.ModelSerializer):
 
         return fields
 
-    def validate(self, data):
-        # Perform the default validation
-        data = super().validate(data)
-
-        role_id = data.get('role_id')
-        division_id = data.get('division_id')
-
-        try:
-            user = User.objects.get(nim=data.get('nim'))
-        except User.DoesNotExist:
-            user = None
-
-        if user is None:
-            if role_id.name in ['Ketua', 'Wakil Ketua']:
-                if User.objects.filter(role_id=role_id, division_id=division_id).exists():
-                    raise ValidationError({
-                        "role" : f'Role {role_id.name} already exists in the selected division.'
-                    })
-
-        if user is not None:
-            if role_id is not None:
-                if user.role_id.name in ['Ketua', 'Wakil Ketua']:
-                    if User.objects.filter(role_id=role_id, division_id=division_id).exclude(nim=user.nim).exists():
-                        raise ValidationError({
-                            "role" : f'Role {role_id.name} already exists in the selected division.'
-                        })
-
-            if division_id is not None:
-                if User.objects.filter(role_id=role_id, division_id=division_id).exclude(nim=user.nim).exists():
-                    raise ValidationError({
-                        "division" : f'Division {division_id.name} already has a role.'
-                    })
-
-        return data
-
     def to_internal_value(self, data):
         new_data = copy.deepcopy(data)
 
@@ -270,6 +235,32 @@ class UserSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         validated_data['updated_at'] = datetime.now()
         validated_data['updated_by'] = self.context['request'].user.nim
+
+        update_fields = {
+            "role_id": None,
+            "division_id": None,
+        }
+
+        if 'role_id' in validated_data:
+            update_fields['role_id'] = validated_data['role_id']
+
+        if 'division_id' in validated_data:
+            update_fields['division_id'] = validated_data['division_id']
+
+        role_leader = Role.objects.get(name='Ketua')
+        role_sub_leader = Role.objects.get(name='Wakil Ketua')
+
+        if update_fields['role_id'] is None:
+            update_fields['role_id'] = instance.role_id
+
+        if update_fields['division_id'] is None:
+            update_fields['division_id'] = instance.division_id
+
+        if role_leader is not None and role_sub_leader is not None:
+            if (update_fields['role_id'] == role_leader.id or update_fields['role_id'] == role_sub_leader.id) and User.objects.filter(role_id=update_fields['role_id'], division_id=update_fields['division_id']).exists():
+                raise ValidationError({
+                    'roleId': 'Ketua/Wakil Ketua sudah ada di divisi tersebut.'
+                })
 
         return super(UserSerializer, self).update(instance, validated_data)
 
