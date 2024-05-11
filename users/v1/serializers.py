@@ -259,6 +259,9 @@ class UserSerializer(serializers.ModelSerializer):
         role_leader = Role.objects.get(name='Ketua')
         role_sub_leader = Role.objects.get(name='Wakil Ketua')
 
+        if update_fields['role_id'] != role_leader.id and update_fields['role_id'] != role_sub_leader.id:
+            return super(UserSerializer, self).update(instance, validated_data)
+
         if role_leader is not None and role_sub_leader is not None:
             user_leader_exists = User.objects.filter(role_id__name=role_leader.name,
                                                      division_id=update_fields['division_id']).exclude(
