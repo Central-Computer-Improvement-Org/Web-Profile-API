@@ -180,7 +180,9 @@ class UserSerializer(serializers.ModelSerializer):
 
         if role_id.name in ['Ketua', 'Wakil Ketua']:
             if User.objects.filter(role_id=role_id, division_id=division_id).exists():
-                raise serializers.ValidationError(f'Role {role_id} already exists in the selected division.')
+                raise ValidationError({
+                    "role" : f'Role {role_id.name} already exists in the selected division.'
+                })
 
         return data
 
