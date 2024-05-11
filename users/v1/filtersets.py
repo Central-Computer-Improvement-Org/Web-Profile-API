@@ -10,7 +10,7 @@ class UserSearchFilter(filters.BaseFilterBackend):
     def filter_queryset(self, request, queryset, view):
         search_param = request.query_params.get('search', None)
         if search_param:
-            queryset = queryset.filter(Q(name__icontains=search_param) | Q(nim_icontains=search_param), Q(email__icontains=search_param))
+            queryset = queryset.filter(Q(name__icontains=search_param))
         return queryset
 
 
