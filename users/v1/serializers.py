@@ -270,11 +270,8 @@ class UserSerializer(serializers.ModelSerializer):
                                                          division_id=update_fields['division_id']).exclude(
                 nim=instance.nim).exists()
 
-            if (user_leader_exists or user_sub_leader_exists) and (
-                    update_fields['role_id'] == role_leader.id or update_fields['role_id'] == role_sub_leader.id):
-                raise ValidationError({
-                    'roleId': ['Ketua/Wakil Ketua sudah ada di divisi tersebut.']
-                })
+            if user_leader_exists or user_sub_leader_exists:
+                raise serializers.ValidationError("Ketua dan Wakil Ketua tidak boleh lebih dari satu orang dalam satu divisi")
 
         return super(UserSerializer, self).update(instance, validated_data)
 
