@@ -247,35 +247,27 @@ class UserSerializer(serializers.ModelSerializer):
         if 'division_id' in validated_data:
             update_fields['division_id'] = validated_data['division_id']
 
-        role_leader = Role.objects.get(name='Ketua')
-        role_sub_leader = Role.objects.get(name='Wakil Ketua')
-
         if update_fields['role_id'] is None:
             update_fields['role_id'] = instance.role_id.id
 
         if update_fields['division_id'] is None:
             update_fields['division_id'] = instance.division_id.id
 
+        role_leader = Role.objects.get(name='Ketua')
+        role_sub_leader = Role.objects.get(name='Wakil Ketua')
+
         if role_leader is not None and role_sub_leader is not None:
-            user = User.objects.filter(role_id__name=role_leader.name,
-                                              division_id=update_fields['division_id'])
+            user_leader_exists = User.objects.filter(role_id__name=role_leader.name,
+                                                     division_id=update_fields['division_id']).exclude(
+                nim=instance.nim).exists()
+            user_sub_leader_exists = User.objects.filter(role_id__name=role_sub_leader.name,
+                                                         division_id=update_fields['division_id']).exclude(
+                nim=instance.nim).exists()
 
-            user_sub_leader = User.objects.filter(role_id__name=role_sub_leader.name,
-                                              division_id=update_fields['division_id'])
-
-            division = Division.objects.get(id=update_fields['division_id'])
-
-            if (user.exists() and user.first().nim != instance.nim):
-                if division.id != instance.division_id.id:
-                    raise ValidationError({
-                        'roleId': ['Ketua/Wakil Ketua sudah ada di divisi tersebut.']
-                    })
-
-            if (user_sub_leader.exists() and user_sub_leader.first().nim != instance.nim):
-                if division.id != instance.division_id.id:
-                    raise ValidationError({
-                        'roleId': ['Ketua/Wakil Ketua sudah ada di divisi tersebut.']
-                    })
+            if user_leader_exists or user_sub_leader_exists:
+                raise ValidationError({
+                    'roleId': ['Ketua/Wakil Ketua sudah ada di divisi tersebut.']
+                })
 
         return super(UserSerializer, self).update(instance, validated_data)
 
