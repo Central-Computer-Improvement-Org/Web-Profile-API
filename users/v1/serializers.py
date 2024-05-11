@@ -3,6 +3,7 @@ from datetime import datetime
 from django.contrib.auth.hashers import make_password
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
 
 from common import utils
 from ..models import User, Role
@@ -170,6 +171,19 @@ class UserSerializer(serializers.ModelSerializer):
 
         return fields
 
+    def validate(self, data):
+        # Perform the default validation
+        data = super().validate(data)
+
+        role_id = data.get('role_id')
+        division_id = data.get('division_id')
+
+        if role_id.name in ['Ketua', 'Wakil Ketua']:
+            if User.objects.filter(role_id=role_id, division_id=division_id).exists():
+                raise serializers.ValidationError(f'Role {role_id} already exists in the selected division.')
+
+        return data
+
     def to_internal_value(self, data):
         new_data = copy.deepcopy(data)
 
@@ -195,6 +209,7 @@ class UserSerializer(serializers.ModelSerializer):
 
         if 'year_community_enrolled' in new_data:
             new_data['year_community_enrolled'] = datetime.strptime(new_data['year_community_enrolled'], '%d-%m-%Y').date()
+
 
         return super().to_internal_value(new_data)
 
