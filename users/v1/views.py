@@ -117,11 +117,15 @@ class UserViewSet(viewsets.ModelViewSet):
         if request.query_params.get('nim'):
             user = User.objects.get(nim=request.query_params.get('nim'))
 
+            context = {
+                "is_singular": True,
+            }
+
             serializer = ResponseSerializer({
                 'code': 200,
                 'status': 'success',
                 'recordsTotal': 1,
-                'data': UserSerializer(user).data,
+                'data': UserSerializer(user, context=context).data,
                 'error': None,
             })
 
