@@ -133,7 +133,7 @@ class UserSerializer(serializers.ModelSerializer):
             'updated_at',
             'created_by',
             'updated_by',
-            'active'
+            'active',
         ]
 
         extra_kwargs = {
@@ -292,6 +292,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     def get_division(self, obj):
         return obj.division_id
+
 
 class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
