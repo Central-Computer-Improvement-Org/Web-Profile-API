@@ -94,7 +94,7 @@ class CMSProjectViewSet(viewsets.ModelViewSet):
         members_arr = []
         divisions_arr = []
 
-        if divisions is not None and divisions is not '':
+        if divisions != None and divisions != '':
             divisions_arr = json.loads(divisions)
 
         if isinstance(divisions_arr, list) and len(divisions_arr) > 0:
@@ -109,7 +109,7 @@ class CMSProjectViewSet(viewsets.ModelViewSet):
                 if detail_division_serializer.is_valid():
                     detail_division_serializer.save()
 
-        if members is not None and members is not '':
+        if members != None and members != '':
             members_arr = json.loads(members)
         
         if isinstance(members_arr, list) and len(members_arr) > 0:
@@ -158,7 +158,7 @@ class CMSProjectViewSet(viewsets.ModelViewSet):
                 members_arr = []
                 divisions_arr = []
 
-                if divisions is not None and divisions is not '':
+                if divisions != None and divisions != '':
                     divisions_arr = json.loads(divisions)
 
                 if isinstance(divisions_arr, list) and len(divisions_arr) > 0:
@@ -172,7 +172,7 @@ class CMSProjectViewSet(viewsets.ModelViewSet):
                         if detail_division_serializer.is_valid():
                             detail_division_serializer.save()
 
-                if members is not None and members is not '':
+                if members != None and members != '':
                     members_arr = json.loads(members)
                 
                 if isinstance(members_arr, list) and len(members_arr) > 0:
