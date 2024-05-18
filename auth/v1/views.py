@@ -30,7 +30,7 @@ class JwtObtain(TokenObtainPairView):
         except User.DoesNotExist:
             raise NotFound('User does not exist!')
 
-        if not user.is_active:
+        if not user.active:
             raise ValidationError({
                 'nim': ['User is not active']
             })
@@ -41,6 +41,8 @@ class JwtObtain(TokenObtainPairView):
             })
 
         response = super().post(request, *args, **kwargs)
+
+        response.data['nim'] = user.nim
 
         serializer = ResponseSerializer({
             'code': 200,
