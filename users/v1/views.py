@@ -238,6 +238,14 @@ class CMSDivisionViewSet(viewsets.ModelViewSet):
             raise ValueError('ID is required')
 
         division = Division.objects.get(id=request.query_params['id'])
+
+        user = User.objects.filter(division_id=division.id)
+
+        if user.exists():
+            raise ValidationError({
+                "user": ['Division is still used by user!']
+            })
+
         division.delete()
 
         serializer = ResponseSerializer({
