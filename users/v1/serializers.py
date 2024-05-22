@@ -210,6 +210,26 @@ class UserSerializer(serializers.ModelSerializer):
             validated_data['created_by'] = "system"
             validated_data['updated_by'] = "system"
 
+        role = None
+        division = None
+
+        if 'role_id' in validated_data:
+            role = Role.objects.get(id=validated_data['role_id'])
+
+        if 'division_id' in validated_data:
+            division = Division.objects.get(id=validated_data['division_id'])
+
+        leader_role = Role.objects.filter(name="Ketua").first()
+        sub_leader_role = Role.objects.filter(name="Wakil Ketua").first()
+
+        if division is not None and role is not None:
+
+            leader_user = User.objects.filter(role_id=leader_role.id, division_id=division.id).exists()
+            sub_leader_user = User.objects.filter(role_id=sub_leader_role.id, division_id=division.id).exists()
+
+            if leader_user or sub_leader_user:
+                raise serializers.ValidationError(["Leader or Sub Leader already exists in this division"])
+
         return super(UserSerializer, self).create(validated_data)
 
     def to_representation(self, instance):
@@ -259,25 +279,19 @@ class UserSerializer(serializers.ModelSerializer):
         role_leader = Role.objects.filter(name='Ketua').first()
         role_sub_leader = Role.objects.filter(name='Wakil Ketua').first()
 
-        if update_fields['role_id'] != role_leader.id and update_fields['role_id'] != role_sub_leader.id:
+        if role_leader is None or role_sub_leader is None:
             return super(UserSerializer, self).update(instance, validated_data)
 
-        leader_user = User.objects.filter(role_id=role_leader.id, division_id=update_fields['division_id']).exists()
-        sub_leader_user = User.objects.filter(role_id=role_sub_leader.id, division_id=update_fields['division_id']).exists()
+        if update_fields['role_id'].id != role_leader.id and update_fields['role_id'].id != role_sub_leader.id:
+            return super(UserSerializer, self).update(instance, validated_data)
 
-        if leader_user and leader_user.nim != instance.nim:
-            raise ValidationError(
-                {
-                    'role_id': ['Ketua sudah ada di divisi ini']
-                }
-            )
+        leader_user = User.objects.filter(role_id=role_leader.id, division_id=update_fields['division_id']).exclude(nim=instance.nim).exists()
+        sub_leader_user = User.objects.filter(role_id=role_sub_leader.id, division_id=update_fields['division_id']).exclude(nim=instance.nim).exists()
 
-        if sub_leader_user and sub_leader_user.nim != instance.nim:
-            raise ValidationError(
-                {
-                    'role_id': ['Wakil Ketua sudah ada di divisi ini']
-                }
-            )
+        if leader_user or sub_leader_user:
+            raise serializers.ValidationError({
+                "roleId": ["Ketua atau Wakil Ketua sudah ada di divisi ini"]
+            })
 
         return super(UserSerializer, self).update(instance, validated_data)
 
