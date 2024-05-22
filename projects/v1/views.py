@@ -1,3 +1,4 @@
+from django.db.models import Q
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db import transaction
 
@@ -44,7 +45,12 @@ class CMSProjectViewSet(viewsets.ModelViewSet):
     def list(self, request, *args, **kwargs):
         if request.query_params.get('id'):
             if request.query_params.get('contributorsOnly') == "true":
-                contributors = DetailContributorProject.objects.filter(project_id=request.query_params.get('id'))
+                if request.query_params.get('search'):
+                    contributors = DetailContributorProject.objects.filter(
+                        ((Q(member_nim__name__icontains=request.query_params.get('search')) | Q(member_nim__nim__icontains=request.query_params.get('search')))) & Q(project_id=request.query_params.get('id'))
+                    )
+                else:
+                    contributors = DetailContributorProject.objects.filter(project_id=request.query_params.get('id'))
 
                 page = self.paginate_queryset(contributors)
 
@@ -248,7 +254,13 @@ class PublicProjectViewSet(viewsets.ModelViewSet):
     def list(self, request, *args, **kwargs):
         if request.query_params.get('id'):
             if request.query_params.get('contributorsOnly') == "true":
-                contributors = DetailContributorProject.objects.filter(project_id=request.query_params.get('id'))
+                if request.query_params.get('search'):
+                    contributors = DetailContributorProject.objects.filter(
+                        ((Q(member_nim__name__icontains=request.query_params.get('search')) | Q(member_nim__nim__icontains=request.query_params.get('search')))) & Q(project_id=request.query_params.get('id'))
+                    )
+                else:
+                    contributors = DetailContributorProject.objects.filter(project_id=request.query_params.get('id'))
+
 
                 page = self.paginate_queryset(contributors)
 
