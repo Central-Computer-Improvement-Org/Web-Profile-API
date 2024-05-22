@@ -292,8 +292,8 @@ class UserSerializer(serializers.ModelSerializer):
         if update_fields['role_id'].id != role_leader.first().id and update_fields['role_id'].id != role_sub_leader.first().id:
             return super(UserSerializer, self).update(instance, validated_data)
 
-        leader_user = User.objects.filter(role_id=role_leader.first().id, division_id=update_fields['division_id']).exclude(nim=instance.nim).exists()
-        sub_leader_user = User.objects.filter(role_id=role_sub_leader.first().id, division_id=update_fields['division_id']).exclude(nim=instance.nim).exists()
+        leader_user = User.objects.filter(role_id=role_leader.first().id, division_id=update_fields['division_id'].id).exclude(nim=instance.nim).exists()
+        sub_leader_user = User.objects.filter(role_id=role_sub_leader.first().id, division_id=update_fields['division_id'].id).exclude(nim=instance.nim).exists()
 
         if leader_user or sub_leader_user:
             raise serializers.ValidationError({
