@@ -1,3 +1,4 @@
+from django.db.models import Q
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db import transaction
 
@@ -47,6 +48,22 @@ class CMSAwardViewSet(viewsets.ModelViewSet):
 
     def list(self, request, *args, **kwargs):
         if request.query_params.get('id'):
+            if request.query_params.get('contributorsOnly') == 'true':
+                if request.query_params.get('search'):
+                    contributors = DetailContributorAward.objects.filter(Q(member_nim__name__icontains=request.query_params.get('search')) | Q(member_nim__nim__icontains=request.query_params.get('search')) & Q(award_id=request.query_params.get('id')))
+                else:
+                    contributors = DetailContributorAward.objects.filter(award_id=request.query_params.get('id'))
+
+                serializer = ResponseSerializer({
+                    'code': 200,
+                    'status': 'success',
+                    'recordsTotal': contributors.count(),
+                    'data': DetailContributorAwardSerializer(contributors, many=True).data,
+                    'error': None,
+                })
+
+                return Response(serializer.data)
+
             award = Award.objects.get(id=request.query_params.get('id'))
 
             serializer = ResponseSerializer({
@@ -199,6 +216,22 @@ class PublicAwardViewSet(viewsets.ModelViewSet):
 
     def list(self, request, *args, **kwargs):
         if request.query_params.get('id'):
+            if request.query_params.get('contributorsOnly') == 'true':
+                if request.query_params.get('search'):
+                    contributors = DetailContributorAward.objects.filter(Q(member_nim__name__icontains=request.query_params.get('search')) | Q(member_nim__nim__icontains=request.query_params.get('search')) & Q(award_id=request.query_params.get('id')))
+                else:
+                    contributors = DetailContributorAward.objects.filter(award_id=request.query_params.get('id'))
+
+                serializer = ResponseSerializer({
+                    'code': 200,
+                    'status': 'success',
+                    'recordsTotal': contributors.count(),
+                    'data': DetailContributorAwardSerializer(contributors, many=True).data,
+                    'error': None,
+                })
+
+                return Response(serializer.data)
+
             award = Award.objects.get(id=request.query_params.get('id'))
 
             serializer = ResponseSerializer({
