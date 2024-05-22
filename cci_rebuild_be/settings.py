@@ -198,8 +198,8 @@ JWT_AUTH = {
 
 SIMPLE_JWT = {
     'AUTH_HEADER_TYPES': ('Bearer',),
-    'USER_ID_FIELD': 'nim',
-    'USER_ID_CLAIM': 'nim',
+    'USER_ID_FIELD': 'email',
+    'USER_ID_CLAIM': 'email',
     'AUTH_TOKEN_CLASSES': (
         'rest_framework_simplejwt.tokens.AccessToken',
     ),

@@ -16,6 +16,7 @@ class JWTObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
     def get_token(cls, user: User):
         token = super().get_token(user)
+        token['email'] = user.email
         token['nim'] = user.nim
         return token
 
@@ -26,13 +27,13 @@ class JwtObtain(TokenObtainPairView):
 
     def post(self, request, *args, **kwargs):
         try:
-            user = User.objects.get(nim=request.data.get('nim'))
+            user = User.objects.get(email=request.data.get('email'))
         except User.DoesNotExist:
             raise NotFound('User does not exist!')
 
         if not user.active:
             raise ValidationError({
-                'nim': ['User is not active']
+                'email': ['User is not active']
             })
 
         if not user.check_password(request.data.get('password')):
@@ -42,6 +43,7 @@ class JwtObtain(TokenObtainPairView):
 
         response = super().post(request, *args, **kwargs)
 
+        response.data['email'] = user.email
         response.data['nim'] = user.nim
 
         serializer = ResponseSerializer({

@@ -31,8 +31,8 @@ class User(AbstractBaseUser):
     created_by = models.CharField(null=True, max_length=255)
     updated_by = models.CharField(null=True, max_length=255)
 
-    USERNAME_FIELD = 'nim'
-    REQUIRED_FIELDS = ['email']
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['nim']
 
     objects = UserManager()
 
