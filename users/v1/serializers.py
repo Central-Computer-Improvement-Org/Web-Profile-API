@@ -228,7 +228,9 @@ class UserSerializer(serializers.ModelSerializer):
             sub_leader_user = User.objects.filter(role_id=sub_leader_role.id, division_id=division.id).exists()
 
             if leader_user or sub_leader_user:
-                raise serializers.ValidationError(["Leader or Sub Leader already exists in this division"])
+                raise serializers.ValidationError({
+                    "roleId" : ["Leader or Sub Leader already exists in this division"]
+                })
 
         return super(UserSerializer, self).create(validated_data)
 
