@@ -278,17 +278,17 @@ class UserSerializer(serializers.ModelSerializer):
             if instance.division_id is not None:
                 update_fields['division_id'] = instance.division_id.id
 
-        role_leader = Role.objects.filter(name='Ketua').first()
-        role_sub_leader = Role.objects.filter(name='Wakil Ketua').first()
+        role_leader = Role.objects.filter(name='Ketua')
+        role_sub_leader = Role.objects.filter(name='Wakil Ketua')
 
-        if role_leader is None or role_sub_leader is None:
+        if not role_leader.exists() or not role_sub_leader.exists():
             return super(UserSerializer, self).update(instance, validated_data)
 
-        if update_fields['role_id'] != role_leader.id and update_fields['role_id'] != role_sub_leader.id:
+        if update_fields['role_id'] != role_leader.first().id and update_fields['role_id'] != role_sub_leader.first().id:
             return super(UserSerializer, self).update(instance, validated_data)
 
-        leader_user = User.objects.filter(role_id=role_leader.id, division_id=update_fields['division_id']).exclude(nim=instance.nim).exists()
-        sub_leader_user = User.objects.filter(role_id=role_sub_leader.id, division_id=update_fields['division_id']).exclude(nim=instance.nim).exists()
+        leader_user = User.objects.filter(role_id=role_leader.first().id, division_id=update_fields['division_id']).exclude(nim=instance.nim).exists()
+        sub_leader_user = User.objects.filter(role_id=role_sub_leader.first().id, division_id=update_fields['division_id']).exclude(nim=instance.nim).exists()
 
         if leader_user or sub_leader_user:
             raise serializers.ValidationError({
