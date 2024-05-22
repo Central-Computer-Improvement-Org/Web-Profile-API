@@ -54,11 +54,13 @@ class CMSAwardViewSet(viewsets.ModelViewSet):
                 else:
                     contributors = DetailContributorAward.objects.filter(award_id=request.query_params.get('id'))
 
+                page = self.paginate_queryset(contributors)
+
                 serializer = ResponseSerializer({
                     'code': 200,
                     'status': 'success',
                     'recordsTotal': contributors.count(),
-                    'data': DetailContributorAwardSerializer(contributors, many=True).data,
+                    'data': DetailContributorAwardSerializer(page, many=True).data,
                     'error': None,
                 })
 
@@ -222,11 +224,13 @@ class PublicAwardViewSet(viewsets.ModelViewSet):
                 else:
                     contributors = DetailContributorAward.objects.filter(award_id=request.query_params.get('id'))
 
+                page = self.paginate_queryset(contributors)
+
                 serializer = ResponseSerializer({
                     'code': 200,
                     'status': 'success',
                     'recordsTotal': contributors.count(),
-                    'data': DetailContributorAwardSerializer(contributors, many=True).data,
+                    'data': DetailContributorAwardSerializer(page, many=True).data,
                     'error': None,
                 })
 
