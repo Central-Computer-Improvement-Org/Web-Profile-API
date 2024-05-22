@@ -274,11 +274,11 @@ class UserSerializer(serializers.ModelSerializer):
 
         if update_fields['role_id'] is None:
             if instance.role_id is not None:
-                update_fields['role_id'] = instance.role_id.id
+                update_fields['role_id'] = instance.role_id
 
         if update_fields['division_id'] is None:
             if instance.division_id is not None:
-                update_fields['division_id'] = instance.division_id.id
+                update_fields['division_id'] = instance.division_id
 
         if update_fields['division_id'] is None or update_fields['role_id'] is None:
             return super(UserSerializer, self).update(instance, validated_data)
