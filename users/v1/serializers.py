@@ -282,7 +282,7 @@ class UserSerializer(serializers.ModelSerializer):
         if role_leader is None or role_sub_leader is None:
             return super(UserSerializer, self).update(instance, validated_data)
 
-        if update_fields['role_id'].id != role_leader.id and update_fields['role_id'].id != role_sub_leader.id:
+        if update_fields['role_id'] != role_leader.id and update_fields['role_id'] != role_sub_leader.id:
             return super(UserSerializer, self).update(instance, validated_data)
 
         leader_user = User.objects.filter(role_id=role_leader.id, division_id=update_fields['division_id']).exclude(nim=instance.nim).exists()
