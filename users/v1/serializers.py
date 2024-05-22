@@ -210,25 +210,25 @@ class UserSerializer(serializers.ModelSerializer):
             validated_data['created_by'] = "system"
             validated_data['updated_by'] = "system"
 
-        role = None
-        division = None
-
-        if 'role_id' in validated_data:
-            role = Role.objects.get(id=validated_data['role_id'])
-
-        if 'division_id' in validated_data:
-            division = Division.objects.get(id=validated_data['division_id'])
-
-        leader_role = Role.objects.filter(name="Ketua").first()
-        sub_leader_role = Role.objects.filter(name="Wakil Ketua").first()
-
-        if division is not None and role is not None:
-
-            leader_user = User.objects.filter(role_id=leader_role.id, division_id=division.id).exists()
-            sub_leader_user = User.objects.filter(role_id=sub_leader_role.id, division_id=division.id).exists()
-
-            if leader_user or sub_leader_user:
-                raise serializers.ValidationError(["Leader or Sub Leader already exists in this division"])
+        # role = None
+        # division = None
+        #
+        # if 'role_id' in validated_data:
+        #     role = Role.objects.get(id=validated_data['role_id'])
+        #
+        # if 'division_id' in validated_data:
+        #     division = Division.objects.get(id=validated_data['division_id'])
+        #
+        # leader_role = Role.objects.filter(name="Ketua").first()
+        # sub_leader_role = Role.objects.filter(name="Wakil Ketua").first()
+        #
+        # if division is not None and role is not None:
+        #
+        #     leader_user = User.objects.filter(role_id=leader_role.id, division_id=division.id).exists()
+        #     sub_leader_user = User.objects.filter(role_id=sub_leader_role.id, division_id=division.id).exists()
+        #
+        #     if leader_user or sub_leader_user:
+        #         raise serializers.ValidationError(["Leader or Sub Leader already exists in this division"])
 
         return super(UserSerializer, self).create(validated_data)
 
