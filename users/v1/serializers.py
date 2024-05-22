@@ -280,6 +280,9 @@ class UserSerializer(serializers.ModelSerializer):
             if instance.division_id is not None:
                 update_fields['division_id'] = instance.division_id.id
 
+        if update_fields['division_id'] is None or update_fields['role_id'] is None:
+            return super(UserSerializer, self).update(instance, validated_data)
+
         role_leader = Role.objects.filter(name='Ketua')
         role_sub_leader = Role.objects.filter(name='Wakil Ketua')
 
