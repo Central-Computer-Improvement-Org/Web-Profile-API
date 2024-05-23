@@ -224,13 +224,14 @@ class UserSerializer(serializers.ModelSerializer):
 
         if division is not None and role is not None:
 
-            leader_user = User.objects.filter(role_id=leader_role.id, division_id=division.id).exists()
-            sub_leader_user = User.objects.filter(role_id=sub_leader_role.id, division_id=division.id).exists()
+            if role.id == leader_role.id or role.id == sub_leader_role.id:
+                leader_user = User.objects.filter(role_id=leader_role.id, division_id=division.id).exists()
+                sub_leader_user = User.objects.filter(role_id=sub_leader_role.id, division_id=division.id).exists()
 
-            if leader_user or sub_leader_user:
-                raise serializers.ValidationError({
-                    "roleId" : ["Leader or Sub Leader already exists in this division"]
-                })
+                if leader_user or sub_leader_user:
+                    raise serializers.ValidationError({
+                        "roleId" : ["Leader or Sub Leader already exists in this division"]
+                    })
 
         return super(UserSerializer, self).create(validated_data)
 

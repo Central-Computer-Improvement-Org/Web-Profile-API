@@ -117,6 +117,9 @@ class UserViewSet(viewsets.ModelViewSet):
         if request.query_params.get('nim'):
             user = User.objects.get(nim=request.query_params.get('nim'))
 
+            if user.role_id.name == 'Superadmin':
+                raise NotFound('User not found!')
+
             context = {
                 "is_singular": True,
             }
@@ -132,6 +135,7 @@ class UserViewSet(viewsets.ModelViewSet):
             return Response(serializer.data)
 
         queryset = self.filter_queryset(self.get_queryset())
+        queryset = queryset.exclude(role_id__name='Superadmin')
 
         page = self.paginate_queryset(queryset)
 
