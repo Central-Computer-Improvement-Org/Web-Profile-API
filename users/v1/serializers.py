@@ -224,13 +224,20 @@ class UserSerializer(serializers.ModelSerializer):
 
         if division is not None and role is not None:
 
-            if role.id == leader_role.id or role.id == sub_leader_role.id:
+            if role.id == leader_role.id:
                 leader_user = User.objects.filter(role_id=leader_role.id, division_id=division.id).exists()
+
+                if leader_user:
+                    raise serializers.ValidationError({
+                        "roleId" : ["Leader already exists in this division"]
+                    })
+
+            elif role.id == sub_leader_role.id:
                 sub_leader_user = User.objects.filter(role_id=sub_leader_role.id, division_id=division.id).exists()
 
-                if leader_user or sub_leader_user:
+                if sub_leader_user:
                     raise serializers.ValidationError({
-                        "roleId" : ["Leader or Sub Leader already exists in this division"]
+                        "roleId" : ["Sub Leader already exists in this division"]
                     })
 
         return super(UserSerializer, self).create(validated_data)
@@ -293,13 +300,24 @@ class UserSerializer(serializers.ModelSerializer):
         if update_fields['role_id'].id != role_leader.first().id and update_fields['role_id'].id != role_sub_leader.first().id:
             return super(UserSerializer, self).update(instance, validated_data)
 
-        leader_user = User.objects.filter(role_id=role_leader.first().id, division_id=update_fields['division_id'].id).exclude(nim=instance.nim).exists()
-        sub_leader_user = User.objects.filter(role_id=role_sub_leader.first().id, division_id=update_fields['division_id'].id).exclude(nim=instance.nim).exists()
 
-        if leader_user or sub_leader_user:
-            raise serializers.ValidationError({
-                "roleId": ["Ketua atau Wakil Ketua sudah ada di divisi ini"]
-            })
+        if update_fields['division_id'].id == role_leader.first().id:
+            leader_user = User.objects.filter(role_id=role_leader.first().id,
+                                              division_id=update_fields['division_id'].id).exclude(nim=instance.nim).exists()
+
+            if leader_user:
+                raise serializers.ValidationError({
+                    "roleId" : ["Leader already exists in this division"]
+                })
+
+        elif update_fields['division_id'].id == role_sub_leader.first().id:
+            sub_leader_user = User.objects.filter(role_id=role_sub_leader.first().id,
+                                                  division_id=update_fields['division_id'].id).exclude(nim=instance.nim).exists()
+
+            if sub_leader_user:
+                raise serializers.ValidationError({
+                    "roleId" : ["Sub Leader already exists in this division"]
+                })
 
         return super(UserSerializer, self).update(instance, validated_data)
 
