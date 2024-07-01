@@ -3,7 +3,7 @@ name: CCI-Web-Profile-API v.1
 on:
     push:
         branches:
-            - 'main'
+            - 'test'
 
 jobs:
     deploy_to_server:
