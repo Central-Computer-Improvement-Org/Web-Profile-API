@@ -37,7 +37,7 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["*", '[::1]', '103-31-38-146.sslip.io']
+ALLOWED_HOSTS = ["*", '[::1]', '103-31-38-146.sslip.io', '.vercel.app']
 
 
 # Application definition
