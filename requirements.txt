@@ -14,5 +14,3 @@ python-dotenv==1.0.1
 result==0.16.1
 returns==0.22.0
 sqlparse==0.4.4
-typing==3.7.4.3
-typing_extensions==4.10.0
