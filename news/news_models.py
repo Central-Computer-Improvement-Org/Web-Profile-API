@@ -17,7 +17,7 @@ class News(models.Model):
     created_by = models.CharField(null=True, max_length=255)
     updated_by = models.CharField(null=True, max_length=255)
 
-    is_published = models.BooleanField(default=False)
+    is_published = models.BooleanField(default=True)
 
     def __str__(self):
         return self.title
