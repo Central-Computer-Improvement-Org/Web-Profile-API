@@ -29,7 +29,7 @@ class CMSNewsViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend, KeywordOrderingFilter, NewsSearchFilter]
     filterset_class = NewsFilter
     ordering_fields = ['createdAt', 'updatedAt']
-    ordering = ['-created_at']
+    ordering = ['created_at']
     pagination_class = GenericPaginator
 
     def create(self, request, *args, **kwargs):
@@ -159,7 +159,7 @@ class PublicNewsViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend, KeywordOrderingFilter]
     filterset_class = NewsFilter
     ordering_fields = ['createdAt', 'updatedAt']
-    ordering = ['-created_at']
+    ordering = ['created_at']
     pagination_class = GenericPaginator
     authentication_classes = []
 
