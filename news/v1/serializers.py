@@ -77,6 +77,8 @@ class NewsSerializer(serializers.ModelSerializer):
         validated_data['created_by'] = self.context['request'].user.nim
         validated_data['updated_by'] = self.context['request'].user.nim
 
+        validated_data['is_published'] = True
+
         return super(NewsSerializer, self).create(validated_data)
 
     def update(self, instance, validated_data):
