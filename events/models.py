@@ -14,7 +14,7 @@ class Event(models.Model):
     division_id = models.ForeignKey(Division, on_delete=models.SET_NULL, null=True)
     media_uri = models.ImageField(upload_to="uploads/events/thumbnails/", validators=[validate_image_size])
     held_on = models.DateField()
-    budget = models.IntegerField()
+    budget = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
 
     created_at = models.DateTimeField(auto_now_add=True, null=True)
     updated_at = models.DateTimeField(auto_now_add=True, null=True)
