@@ -128,7 +128,7 @@ class UserSerializer(serializers.ModelSerializer):
             'phone_number',
             'profile_uri',
             'year_university_enrolled',
-            'year_community_enrolled',
+            'period',
             'created_at',
             'updated_at',
             'created_by',
@@ -151,7 +151,7 @@ class UserSerializer(serializers.ModelSerializer):
             'phone_number',
             'profile_uri',
             'year_university_enrolled',
-            'year_community_enrolled'
+            'period'
         ]
 
         read_only_fields = [
@@ -185,7 +185,7 @@ class UserSerializer(serializers.ModelSerializer):
         if 'yearUniversityEnrolled' in data:
             new_data['year_university_enrolled'] = data.get('yearUniversityEnrolled', None)
         if 'yearCommunityEnrolled' in data:
-            new_data['year_community_enrolled'] = data.get('yearCommunityEnrolled', None)
+            new_data['period'] = data.get('yearCommunityEnrolled', None)
         if 'linkedinUri' in data:
             new_data['linkedin_uri'] = data.get('linkedinUri', None)
         if 'isActive' in data:
@@ -194,8 +194,8 @@ class UserSerializer(serializers.ModelSerializer):
         if 'year_university_enrolled' in new_data:
             new_data['year_university_enrolled'] = datetime.strptime(new_data['year_university_enrolled'], '%d-%m-%Y').date()
 
-        if 'year_community_enrolled' in new_data:
-            new_data['year_community_enrolled'] = datetime.strptime(new_data['year_community_enrolled'], '%d-%m-%Y').date()
+        if 'period' in new_data:
+            new_data['period'] = datetime.strptime(new_data['period'], '%d-%m-%Y').date()
 
 
         return super().to_internal_value(new_data)
@@ -253,7 +253,7 @@ class UserSerializer(serializers.ModelSerializer):
         response['phoneNumber'] = response.pop('phone_number', None)
         response['profileUri'] = response.pop('profile_uri', None)
         response['yearUniversityEnrolled'] = response.pop('year_university_enrolled', None)
-        response['yearCommunityEnrolled'] = response.pop('year_community_enrolled', None)
+        response['yearCommunityEnrolled'] = response.pop('period', None)
         response['isActive'] = response.pop('active', None)
         response['createdAt'] = response.pop('created_at', None)
         response['updatedAt'] = response.pop('updated_at', None)
