@@ -53,6 +53,21 @@ class CMSEventViewSet(viewsets.ModelViewSet):
 
             return Response(serializer.data)
 
+        if request.query_params.get('divisionId'):
+            events = Event.objects.filter(division_id=request.query_params.get('divisionId'))
+
+            page = self.paginate_queryset(events)
+
+            serializer = ResponseSerializer({
+                'code': 200,
+                'status': 'success',
+                'recordsTotal': events.count(),
+                'data': EventSerializer(page, many=True).data,
+                'error': None,
+            })
+
+            return Response(serializer.data)
+
         events = self.filter_queryset(self.get_queryset())
 
         page = self.paginate_queryset(events)
@@ -134,6 +149,21 @@ class PublicEventViewSet(viewsets.ModelViewSet):
                 'status': 'success',
                 'recordsTotal': 1,
                 'data': EventSerializer(event).data,
+                'error': None,
+            })
+
+            return Response(serializer.data)
+
+        if request.query_params.get('divisionId'):
+            events = Event.objects.filter(division_id=request.query_params.get('divisionId'))
+
+            page = self.paginate_queryset(events)
+
+            serializer = ResponseSerializer({
+                'code': 200,
+                'status': 'success',
+                'recordsTotal': events.count(),
+                'data': EventSerializer(page, many=True).data,
                 'error': None,
             })
 
