@@ -82,7 +82,8 @@ CORS_ALLOWED_ORIGINS = [
     'https://freedb.tech',
     'https://staging-web-profile.dns-dynamic.net',
     'http://103.187.147.80:3001',
-    'http://103.187.147.80'
+    'http://103.187.147.80',
+    'http://103.187.147.80:3000'
 ]
 
 CORS_ALLOW_HEADERS = (
