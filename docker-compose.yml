@@ -1,0 +1,34 @@
+version: '3'
+
+services:
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_DATABASE: cci_web
+      MYSQL_USER: remote
+      MYSQL_PASSWORD: cciVpsYa?990
+      MYSQL_ROOT_PASSWORD: cciVpsYa?990
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - mynetwork
+
+  web:
+    build: .
+    command: gunicorn --bind 0.0.0.0:8000 myproject.wsgi:application
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: jdbc:mysql://103.187.147.80:3306/cci_web
+    networks:
+      - mynetwork
+
+volumes:
+  db_data:
+
+networks:
+  mynetwork:
