@@ -2,7 +2,8 @@ version: '3'
 
 services:
   db:
-    image: mysql:8.0
+    image: mysql:5.7
+    restart: always
     environment:
       MYSQL_DATABASE: cci_web
       MYSQL_USER: remote
@@ -10,12 +11,12 @@ services:
       MYSQL_ROOT_PASSWORD: cciVpsYa?990
     volumes:
       - db_data:/var/lib/mysql
-    networks:
-      - mynetwork
+    ports:
+      - "3306:3306"
 
   web:
     build: .
-    command: gunicorn --bind 0.0.0.0:8000 myproject.wsgi:application
+    command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - .:/app
     ports:
@@ -23,12 +24,14 @@ services:
     depends_on:
       - db
     environment:
-      DATABASE_URL: jdbc:mysql://103.187.147.80:3306/cci_web
-    networks:
-      - mynetwork
+      - DATABASE_NAME=cci_web
+      - DATABASE_USER=remote
+      - DATABASE_PASSWORD=cciVpsYa?990
+      - DATABASE_HOST=103.187.147.80
+      - DATABASE_PORT=3306
+      - DATABASE_ENGINE=django.db.backends.mysql
+      - JWT_SECRET_KEY=secret
+      - SECRET_KEY=secret
 
 volumes:
   db_data:
-
-networks:
-  mynetwork:
