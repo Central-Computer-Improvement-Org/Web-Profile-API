@@ -18,7 +18,7 @@ jobs:
         with:
           host: 103.187.147.80
           username: cci-vps
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          key: ${{ secrets.VPS_SSH_KEY }}
           port: 22
           script: |
             cd ~/Web-Profile-API/
