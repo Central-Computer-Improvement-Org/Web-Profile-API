@@ -37,7 +37,7 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ["*", '[::1]', '103.187.147.80', '103-31-38-146.sslip.io', 'kevinid.pythonanywhere.com', 'sql.freedb.tech:3306']
+ALLOWED_HOSTS = ["*", '[::1]', '103.187.147.80', '103-31-38-146.sslip.io', 'kevinid.pythonanywhere.com', 'sql.freedb.tech:3306', 'staging-web-profile.dns-dynamic.net']
 
 
 # Application definition
@@ -79,7 +79,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:3000",
     "https://central-computer-improvement-org.github.io",
     'https://kevinid.pythonanywhere.com',
-    'https://freedb.tech'
+    'https://freedb.tech',
     'https://staging-web-profile.dns-dynamic.net',
     'http://103.187.147.80:3001',
     'http://103.187.147.80'
