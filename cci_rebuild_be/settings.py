@@ -80,6 +80,8 @@ CORS_ALLOWED_ORIGINS = [
     "https://central-computer-improvement-org.github.io",
     'https://kevinid.pythonanywhere.com',
     'https://freedb.tech'
+    'https://staging-web-profile.dns-dynamic.net',
+    'http://103.187.147.80:3001'
 ]
 
 CORS_ALLOW_HEADERS = (
