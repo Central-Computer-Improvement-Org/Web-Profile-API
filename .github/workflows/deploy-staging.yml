@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+  PREPARE stmt FROM 'INSERT INTO `cci_web`.`users_user` (`nim`,`phone_number`,`nim`,`year_university_enrolled`,`name`,`phone_number`,`updated_at`,`updated_by`,`year_university_enrolled`,`active`,`role_id_id`,`division_id_id`) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)'
 
 jobs:
   deploy:
