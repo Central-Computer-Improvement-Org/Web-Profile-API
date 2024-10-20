@@ -128,6 +128,7 @@ class UserSerializer(serializers.ModelSerializer):
             'phone_number',
             'profile_uri',
             'year_university_enrolled',
+            'year_community_enrolled',
             'period',
             'created_at',
             'updated_at',
