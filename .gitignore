@@ -2,3 +2,6 @@
 .idea
 .vscode
 __pycache__
+uploads
+media
+cci_web_profile

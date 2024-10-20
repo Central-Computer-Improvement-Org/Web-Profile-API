@@ -21,6 +21,7 @@ class User(AbstractBaseUser):
     profile_uri = models.ImageField(upload_to="uploads/user/profile/", validators=[validate_image_size])
 
     year_university_enrolled = models.DateField(null=True)
+    year_community_enrolled = models.CharField(max_length=5, null=True)
     period = models.CharField(max_length=255, null=True)
 
     active = models.BooleanField(default=True)
