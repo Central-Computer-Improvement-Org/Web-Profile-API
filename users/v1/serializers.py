@@ -184,6 +184,8 @@ class UserSerializer(serializers.ModelSerializer):
             new_data['profile_uri'] = data.get('profileUri', None)
         if 'yearUniversityEnrolled' in data:
             new_data['year_university_enrolled'] = data.get('yearUniversityEnrolled', None)
+        if 'yearCommunityEnrolled' in data:
+            new_data['year_community_enrolled'] = data.get('yearCommunityEnrolled', None)
         if 'period' in data:
             new_data['period'] = data.get('period', None)
         if 'linkedinUri' in data:
@@ -249,6 +251,7 @@ class UserSerializer(serializers.ModelSerializer):
         response['phoneNumber'] = response.pop('phone_number', None)
         response['profileUri'] = response.pop('profile_uri', None)
         response['yearUniversityEnrolled'] = response.pop('year_university_enrolled', None)
+        response['yearCommunityEnrolled'] = response.pop('year_community_enrolled', None)
         response['period'] = response.pop('period', None)
         response['isActive'] = response.pop('active', None)
         response['createdAt'] = response.pop('created_at', None)
