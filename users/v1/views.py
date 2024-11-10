@@ -243,7 +243,7 @@ class CMSDivisionViewSet(viewsets.ModelViewSet):
 
         division = Division.objects.get(id=request.query_params['id'])
 
-        user = User.objects.filter(division_id=division.id)
+        user = User.objects.filter(division=division.id)
 
         if user.exists():
             raise ValidationError({
