@@ -2,6 +2,7 @@ import copy
 import json
 from datetime import datetime
 
+from django.db import transaction
 from django.utils import timezone
 from django_filters import OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend
@@ -33,51 +34,45 @@ class CMSNewsViewSet(viewsets.ModelViewSet):
     pagination_class = GenericPaginator
 
     def create(self, request, *args, **kwargs):
-        #super(CMSNewsViewSet, self).create(request, *args, **kwargs)
+        with transaction.atomic():
+            news_copy = copy.deepcopy(request.data)
+            detail_news_media = None
 
-        news_copy = copy.deepcopy(request.data)
+            if 'detailNewsMedia' in news_copy:
+                detail_news_media = news_copy.pop('detailNewsMedia')
 
-        detail_news_media = None
+            serializer = NewsSerializer(data=news_copy, context={'request': request})
+            if not serializer.is_valid():
+                raise ValidationError(serializer.errors)
 
-        if 'detailNewsMedia' in news_copy:
-            detail_news_media = news_copy.pop('detailNewsMedia')
+            serializer.save()
 
-        serializer = NewsSerializer(data=news_copy, context={'request': request})
+            if detail_news_media is not None:
+                dnms = []
 
-        if not serializer.is_valid():
-            raise ValidationError(serializer.errors)
+                for media in detail_news_media:
+                    new_dnm = {
+                        'newsId': serializer.data['id'],
+                        'mediaUri': media
+                    }
+                    dnm_serializer = DetailNewsMediaSerializer(data=new_dnm, context={'request': request})
+                    if not dnm_serializer.is_valid():
+                        raise ValidationError(dnm_serializer.errors)
+                    dnms.append(dnm_serializer)
 
-        serializer.save()
+                for dnm in dnms:
+                    dnm.save()
 
-        if detail_news_media is not None:
-            dnms = []
-
-            for media in detail_news_media:
-                new_dnm = {
-                    'newsId': serializer.data['id'],
-                    'mediaUri': media
-                }
-                dnm_serializer = DetailNewsMediaSerializer(data=new_dnm, context={'request': request})
-
-                if not dnm_serializer.is_valid():
-                    raise ValidationError(dnm_serializer.errors)
-
-                dnms.append(dnm_serializer)
-
-            for dnm in dnms:
-                dnm.save()
-
-        serializer = ResponseSerializer({
-            'code': 200,
-            'status': 'success',
-            'recordsTotal': 1,
-            'data': {
-                "message": "Created news successfully"
-            },
-            'error': None,
-        })
-
-        return Response(serializer.data)
+            response_data = {
+                'code': 200,
+                'status': 'success',
+                'recordsTotal': 1,
+                'data': {
+                    "message": "Created news successfully"
+                },
+                'error': None,
+            }
+            return Response(response_data)
 
     def destroy(self, request, *args, **kwargs):
         if request.query_params.get('id') is None:

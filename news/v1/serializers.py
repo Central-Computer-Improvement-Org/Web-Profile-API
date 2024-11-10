@@ -1,3 +1,5 @@
+import os
+
 from django.utils import timezone
 from rest_framework import serializers
 from rest_framework.fields import SerializerMethodField
@@ -10,7 +12,7 @@ import copy
 
 class NewsSerializer(serializers.ModelSerializer):
     media_uri = serializers.ImageField(required=False)
-    detail_news_media = serializers.ListField(child=serializers.CharField(), required=False)
+    detail_news_media = serializers.ListField(child=serializers.DictField(), read_only=True)
 
     class Meta:
         model = News
@@ -91,7 +93,20 @@ class NewsSerializer(serializers.ModelSerializer):
         return super(NewsSerializer, self).update(instance, validated_data)
 
     def get_detail_news_media(self, obj):
-        detail_news_media = map(lambda x: "/media/" + x, DetailNewsMedia.objects.filter(news_id=obj.id).values_list('media_uri', flat=True))
+        dnm_filter = DetailNewsMedia.objects.filter(news_id=obj.id).values_list('media_uri', flat=True)
+        detail_news_media_uri = list(map(lambda x: "media/" + x, dnm_filter))
+        detail_news_media_filename = list(map(lambda x: x.split('/')[-1], detail_news_media_uri))
+        detail_news_media_filesize = list(map(lambda x: "{0:.2f}".format(os.path.getsize(x) / 1024), detail_news_media_uri))
+
+        detail_news_media = []
+
+        for i in range(len(dnm_filter)):
+            detail_news_media.append({
+                'mediaUri': detail_news_media_uri[i],
+                'mediaFilename': detail_news_media_filename[i],
+                'mediaFilesize': detail_news_media_filesize[i],
+            })
+
         return detail_news_media
 
 
