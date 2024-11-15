@@ -93,8 +93,9 @@ class NewsSerializer(serializers.ModelSerializer):
         return super(NewsSerializer, self).update(instance, validated_data)
 
     def get_detail_news_media(self, obj):
-        dnm_filter = DetailNewsMedia.objects.filter(news_id=obj.id).values_list('media_uri', flat=True)
-        detail_news_media_uri = list(map(lambda x: "media/" + x, dnm_filter))
+        dnm_filter = DetailNewsMedia.objects.filter(news_id=obj.id)
+        media_uri = dnm_filter.values_list('media_uri', flat=True)
+        detail_news_media_uri = list(map(lambda x: "media/" + x, media_uri))
         detail_news_media_filename = list(map(lambda x: x.split('/')[-1], detail_news_media_uri))
         detail_news_media_filesize = list(map(lambda x: "{0:.2f}".format(os.path.getsize(x) / 1024), detail_news_media_uri))
 
@@ -102,6 +103,7 @@ class NewsSerializer(serializers.ModelSerializer):
 
         for i in range(len(dnm_filter)):
             detail_news_media.append({
+                'id': dnm_filter[i].id,
                 'mediaUri': "/" + detail_news_media_uri[i],
                 'mediaFilename': detail_news_media_filename[i],
                 'mediaFilesize': detail_news_media_filesize[i],
