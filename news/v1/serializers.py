@@ -102,7 +102,7 @@ class NewsSerializer(serializers.ModelSerializer):
 
         for i in range(len(dnm_filter)):
             detail_news_media.append({
-                'mediaUri': detail_news_media_uri[i],
+                'mediaUri': "/" + detail_news_media_uri[i],
                 'mediaFilename': detail_news_media_filename[i],
                 'mediaFilesize': detail_news_media_filesize[i],
             })
