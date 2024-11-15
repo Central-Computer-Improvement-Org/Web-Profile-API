@@ -104,6 +104,24 @@ class CMSNewsViewSet(viewsets.ModelViewSet):
         if not serializer.is_valid():
             raise ValidationError(serializer.errors)
 
+        if 'detailNewsMedia' in request.data:
+            detail_news_media = request.data.pop('detailNewsMedia')
+
+            dnms = []
+
+            for media in detail_news_media:
+                new_dnm = {
+                    'newsId': news.id,
+                    'mediaUri': media
+                }
+                dnm_serializer = DetailNewsMediaSerializer(data=new_dnm, context={'request': request})
+                if not dnm_serializer.is_valid():
+                    raise ValidationError(dnm_serializer.errors)
+                dnms.append(dnm_serializer)
+
+            for dnm in dnms:
+                dnm.save()
+
         serializer.save()
 
         serializer = ResponseSerializer({
