@@ -129,7 +129,17 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='user',
             name='year_community_enrolled',
+            field=models.TextField(null=True),
+        ),
+        migrations.AlterField(
+            model_name='user',
+            name='year_community_enrolled',
             field=models.DateField(null=True),
+        ),
+        migrations.AlterField(
+            model_name='user',
+            name='year_university_enrolled',
+            field=models.TextField(null=True),
         ),
         migrations.AlterField(
             model_name='user',

@@ -5,7 +5,8 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y \
     pkg-config \
     python3-dev \
-    default-libmysqlclient-dev \
+    postgresql-client  \
+    postgresql-server \
     build-essential \
     && rm -rf /var/lib/apt/lists/*
 
@@ -17,6 +18,6 @@ COPY . /app/
 
 RUN python3 manage.py migrate
 
-EXPOSE 8000
+EXPOSE 8181
 
 CMD ["python3", "manage.py", "runserver", "0.0.0.0:8000"]

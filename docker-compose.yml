@@ -1,39 +1,30 @@
 version: '3'
 
 services:
-  db:
-    image: mysql:5.7
-    restart: always
-    environment:
-      MYSQL_DATABASE: cci_web
-      MYSQL_USER: remote
-      MYSQL_PASSWORD: cciVpsYa?990
-      MYSQL_ROOT_PASSWORD: cciVpsYa?990
-    volumes:
-      - db_data:/var/lib/mysql
+  postgres:
+    image: postgres:14-alpine
     ports:
-      - "3306:3306"
+      - "5432:5432"
+    volumes:
+      - ~/app/postgres:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=pastibukanjokowi
+      - POSTGRES_USER=cci_postgres
+      - POSTGRES_DB=cci_be
 
   web:
     build: .
     links:
-      - db
-    command: python manage.py runserver 0.0.0.0:8000
+        - postgres
+    command: python manage.py runserver 0.0.0.0:8181
     volumes:
       - .:/app
     ports:
-      - "8000:8000"
+      - "8181:8181"
     depends_on:
-      - db
+        - postgres
     environment:
-      - DATABASE_NAME=cci_web
-      - DATABASE_USER=remote
-      - DATABASE_PASSWORD=cciVpsYa?990
-      - DATABASE_HOST=103.187.147.80
-      - DATABASE_PORT=3306
-      - DATABASE_ENGINE=django.db.backends.mysql
-      - JWT_SECRET_KEY=secret
-      - SECRET_KEY=secret
+      env_file: .env
 
 volumes:
-  db_data:
+    postgres_data:
