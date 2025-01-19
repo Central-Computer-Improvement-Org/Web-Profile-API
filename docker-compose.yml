@@ -1,30 +1,32 @@
-version: '3'
-
 services:
-  postgres:
-    image: postgres:14-alpine
-    ports:
-      - "5432:5432"
-    volumes:
-      - ~/app/postgres:/var/lib/postgresql/data
-    environment:
-      - POSTGRES_PASSWORD=pastibukanjokowi
-      - POSTGRES_USER=cci_postgres
-      - POSTGRES_DB=cci_be
-
   web:
     build: .
     links:
-        - postgres
-    command: python manage.py runserver 0.0.0.0:8181
+      - postgres
+    command: "gunicorn cci_rebuild_be.wsgi:application --bind 0.0.0.0:8181"
     volumes:
       - .:/app
     ports:
       - "8181:8181"
+    expose:
+      - "8181"
     depends_on:
-        - postgres
+      - postgres
+    env_file:
+      - .env
+  postgres:
+    image: postgres:14-alpine
+    ports:
+      - "5433:5432"
+    expose:
+      - "5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
     environment:
-      env_file: .env
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_HOST: ${POSTGRES_HOST}
 
 volumes:
-    postgres_data:
+  postgres_data:
