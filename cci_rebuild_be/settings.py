@@ -84,6 +84,7 @@ CORS_ALLOWED_ORIGINS = [
     'http://103.187.147.80:3001',
     'http://103.187.147.80',
     'http://103.187.147.80:3000'
+    'http://cci-rebuild-backoffice.kakashispiritnews.my.id'
 ]
 
 CORS_ALLOW_HEADERS = (
